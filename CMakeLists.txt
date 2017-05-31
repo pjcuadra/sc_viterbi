@@ -16,7 +16,7 @@
 project(sc_viterbi)
 
 # Define required cmake version
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 2.8)
 
 # Include macros
 include(macros.cmake)
@@ -38,8 +38,8 @@ find_package(SystemC REQUIRED)
 add_library(libsc_viterbi_run STATIC ${sc_viterbi_SOURCES})
 
 # Parse all test sources
-add_subdirectory(test/src/)
-include_directories(include/ test/include/)
+#add_subdirectory(test/src/)
+#include_directories(include/ test/include/)
 
 # Create placeholder for wave traces
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/trace/")
