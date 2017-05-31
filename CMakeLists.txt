@@ -29,10 +29,12 @@ enable_testing()
 
 # Parse all sources
 add_subdirectory(src/)
-include_directories(include/)
 
 # Find SystemC Library
 find_package(SystemC REQUIRED)
+
+# Add SystemC headers
+include_directories(include/ ${SystemC_INCLUDE_DIRS})
 
 # Create library out of code
 add_library(libsc_viterbi_run STATIC ${sc_viterbi_SOURCES})
