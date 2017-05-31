@@ -1,0 +1,12 @@
+checkout:
+  post:
+    - mkdir build
+
+dependencies:
+  post:
+    - echo "Dependencies HERE"
+
+test:
+  override:
+    - cd build/ && cmake .. && make
+    - cd build/ && cmake .. && make test
