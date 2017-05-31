@@ -1,10 +1,15 @@
+machine:
+  environment:
+    SYSTEMC_PREFIX: ${HOME}/tmp/systemc-2.3-master/objdir
+
 checkout:
   post:
     - mkdir build
 
 dependencies:
   post:
-    - echo "Dependencies HERE"
+    - mkdir tmp
+    - cd tmp && wget https://github.com/systemc/systemc-2.3/archive/master.zip && unzip master.zip && cd systemc-2.3-master/ && mkdir objdir && cd objdir && ../configure && make
 
 test:
   override:
