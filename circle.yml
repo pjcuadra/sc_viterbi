@@ -1,17 +1,20 @@
 machine:
   environment:
-    SYSTEMC_PREFIX: ${HOME}/tmp/systemc-2.3-master/objdir
+    SYSTEMC_PREFIX: ${HOME}/sc_viterbi/tmp/systemc-2.3-master/
 
 checkout:
   post:
+    - rm -rf build
     - mkdir build
 
 dependencies:
   post:
-    - mkdir tmp
-    - cd tmp && wget https://github.com/systemc/systemc-2.3/archive/master.zip && unzip master.zip && cd systemc-2.3-master/ && mkdir objdir && cd objdir && ../configure && make
+    - ./ci/compile_systemc.sh
+
+compile:
+  override:
+    - cd build/ && cmake .. && make
 
 test:
   override:
-    - cd build/ && cmake .. && make
-    - cd build/ && cmake .. && make test
+    - cd build/ && make test
