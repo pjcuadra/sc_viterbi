@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-#include<sample/full_adder.h>
+#include<common/full_adder.h>
 
 void full_adder::prc_full_adder () {
   sum = (a ^ b) ^ carry_in;

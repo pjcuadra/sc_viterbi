@@ -12,7 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Add source directory
-add_sources_directory(common
-                      encoder/
-                      decoder/)
+# Add test directory
+add_test_sources_directory(sample)
