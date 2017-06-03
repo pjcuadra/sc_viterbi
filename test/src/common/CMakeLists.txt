@@ -12,4 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_test_sources(full_adder_ut.cpp)
+add_test_sources(full_adder_ut.cpp
+                 shift_register.cpp)

@@ -31,5 +31,8 @@
 *.out
 *.app
 
+# Other
 venv
 build
+doc/build
+nbproject

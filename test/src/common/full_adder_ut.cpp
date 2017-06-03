@@ -34,7 +34,7 @@ SC_MODULE(stimulus) {
   SC_CTOR(stimulus) {
     SC_THREAD (prc_stimulus);
   }
-  
+
 };
 
 // SC_MODULE(scope) {
