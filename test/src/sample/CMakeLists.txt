@@ -12,7 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Add source directory
-add_sources_directory(common
-                      encoder/
-                      decoder/)
+add_test_sources(full_adder_ut.cpp)

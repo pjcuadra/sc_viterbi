@@ -17,4 +17,6 @@ compile:
 
 test:
   override:
+    - cd build/ && make
+    - cd build/ && make compile_tests
     - cd build/ && make test

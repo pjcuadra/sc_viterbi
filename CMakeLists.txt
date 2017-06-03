@@ -19,7 +19,7 @@ project(sc_viterbi)
 cmake_minimum_required(VERSION 2.8)
 
 # Include macros
-include(macros.cmake)
+include(cmake/macros.cmake)
 
 # Locate the packages
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -39,9 +39,18 @@ include_directories(include/ ${SystemC_INCLUDE_DIRS})
 # Create library out of code
 add_library(libsc_viterbi_run STATIC ${sc_viterbi_SOURCES})
 
+# Add compile test target
+set(CTEST_OUTPUT_ON_FAILURE 1)
+
+#set_property(GLOBAL PROPERTY TRACE_PATH ${CMAKE_CURRENT_BINARY_DIR}/trace/)
+add_definitions(-DTRACE_PATH="${CMAKE_CURRENT_BINARY_DIR}/trace/")
+
 # Parse all test sources
-#add_subdirectory(test/src/)
-#include_directories(include/ test/include/)
+include_directories(include/ test/include/)
+add_subdirectory(test/src/)
+
+# Compile all tests
+add_all_tests()
 
 # Create placeholder for wave traces
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/trace/")

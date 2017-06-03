@@ -12,9 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-#include<sample/full_adder.h>
+#include <sc_test_framework.h>
 
-void full_adder::prc_full_adder () {
-  sum = (a ^ b) ^ carry_in;
-  carry_out = ((a ^ b) & carry_in) | (a & b);
+int sc_main(int argc, char* argv[]) {
+  //sc_report_handler::set_actions("/IEEE_Std_1666/deprecated", SC_DO_NOTHING);
+
+  sc_unit_test * test = new sc_unit_test("main");
+  delete(test);
+
+  return 0;
 }

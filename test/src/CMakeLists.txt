@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Add source directory
-add_sources_directory(common
-                      encoder/
-                      decoder/)
+#add_executable(full_adder_ut sample/full_adder_ut.cpp)
+#target_link_libraries(full_adder_ut libsc_viterbi_run ${SystemC_LIBRARIES})
+#add_test(full_adder_ut ${CMAKE_CURRENT_BINARY_DIR}/full_adder_ut)
+
+#add_executable(main main.cpp)
+#target_link_libraries(main libsc_viterbi_run ${SystemC_LIBRARIES})
+#add_test(main ${CMAKE_CURRENT_BINARY_DIR}/main "" "")
+
+add_test_sources_directory(sample)
