@@ -1,0 +1,20 @@
+machine:
+  environment:
+    SYSTEMC_PREFIX: ${HOME}/sc_viterbi/tmp/systemc-2.3-master/
+
+checkout:
+  post:
+    - rm -rf build
+    - mkdir build
+
+dependencies:
+  post:
+    - ./ci/compile_systemc.sh
+
+compile:
+  override:
+    - cd build/ && cmake .. && make
+
+test:
+  override:
+    - cd build/ && make test
