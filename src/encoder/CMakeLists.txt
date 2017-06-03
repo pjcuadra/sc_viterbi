@@ -12,6 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Add source directory
-add_sources_directory(encoder/
-                      decoder/)
+# Add sources
+add_sources(encoder.cpp)
