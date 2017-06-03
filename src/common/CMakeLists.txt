@@ -12,5 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Add test directory
-add_test_sources_directory(sample)
+# Add sources
+add_sources(full_adder.cpp)

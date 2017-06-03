@@ -42,7 +42,7 @@ add_library(libsc_viterbi_run STATIC ${sc_viterbi_SOURCES})
 # Add compile test target
 set(CTEST_OUTPUT_ON_FAILURE 1)
 
-#set_property(GLOBAL PROPERTY TRACE_PATH ${CMAKE_CURRENT_BINARY_DIR}/trace/)
+# Add compilation flag to select trace files path
 add_definitions(-DTRACE_PATH="${CMAKE_CURRENT_BINARY_DIR}/trace/")
 
 # Parse all test sources
