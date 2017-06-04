@@ -16,14 +16,17 @@
 
 void convolution::calculate_conv_method()
 {
-  if (reset)
+  if (reset == '1')
   {
-    y1 = sc_bit('0'); //set Y1 output 0
-    y2 = sc_bit('0'); //set Y2 output 0
+    //y ="00";
+    op[0]='0'; //set Y1 output 0
+    op[1]='0'; //set Y2 output 0
+
   }
   else
   {
-    y1= (mem_1 ^ mem_2) ^ mem_3; // Generator Polynomial (1,1,1)
-    y2= mem_1 ^ mem_3; // Generator Polynomial (1,0,1)
+    op[0]= (ip[0] ^ ip[1]) ^ ip[2]; // Generator Polynomial (1,1,1)
+    op[1]= ip[0] ^ ip[2]; // Generator Polynomial (1,0,1)
   }
+  y.write(op);
 }

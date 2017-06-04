@@ -17,17 +17,23 @@
 
 #include<systemc.h>
 
+const int _M_PARAM = 3;
+const int _OUTPUT_PARAM = 2;
+
 SC_MODULE (convolution) {
-  sc_in<bool> clk,reset;
-  sc_in<sc_bit> mem_1, mem_2, mem_3;
-  sc_out<sc_bit> y1, y2;
+  sc_in_clk clk;
+  sc_in<sc_logic> reset;
+  sc_in<sc_lv<_M_PARAM> > mem; //logic vector of memory element
+  sc_out<sc_lv<_OUTPUT_PARAM> > y; //logic vector of output of convolution block
+  sc_lv<_OUTPUT_PARAM> op;
+  sc_lv<_M_PARAM>ip;
 
   void calculate_conv_method();
 
   SC_CTOR (convolution) {
     SC_METHOD (calculate_conv_method);
     dont_initialize();
-    sensitive << clk.pos()<<reset;
+    sensitive << clk.pos() <<reset;
   }
 
 };
