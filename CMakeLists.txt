@@ -43,14 +43,16 @@ add_library(libsc_viterbi_run STATIC ${sc_viterbi_SOURCES})
 set(CTEST_OUTPUT_ON_FAILURE 1)
 
 # Add compilation flag to select trace files path
-add_definitions(-DTRACE_PATH="${CMAKE_CURRENT_BINARY_DIR}/trace/")
+
+
+#add_definitions(-DTRACE_PATH="${CMAKE_CURRENT_BINARY_DIR}/trace/")
 
 # Parse all test sources
 include_directories(include/ test/include/)
-add_subdirectory(test/src/)
+
 
 # Compile all tests
-add_all_tests()
+add_all_tests(test/src/)
 
 # Create placeholder for wave traces
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/trace/")
