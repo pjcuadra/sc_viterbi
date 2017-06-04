@@ -12,15 +12,14 @@ Install SystemC Library
 On Linux
 ********
 
-To install **SystemC** on Ubuntu 16.04, first you have to install some
-dependencies, by running;
+To install **SystemC**, first you have to install some dependencies, by running;
 
 .. code::
 
   sudo apt-get install build-essential
 
 Download **SystemC 2.3** from https://github.com/systemc/systemc-2.3. After
-downloading, extract it. Now we need to compile it by running;
+downloading, extract it. Now we need to compile and install it by running;
 
 .. code::
 
@@ -30,7 +29,7 @@ downloading, extract it. Now we need to compile it by running;
   sudo make install
 
 
-No you can build the code by running;
+Now you can build the code by running;
 
 .. code::
 

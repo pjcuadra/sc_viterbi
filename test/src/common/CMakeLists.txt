@@ -13,4 +13,4 @@
 # limitations under the License.
 
 add_test_sources(full_adder_ut.cpp
-                 shift_register.cpp)
+                 shift_register_ut.cpp)
