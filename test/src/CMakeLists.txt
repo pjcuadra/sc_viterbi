@@ -13,4 +13,4 @@
 # limitations under the License.
 
 # Add test directory
-add_test_sources_directory(sample)
+add_test_sources_directory(common)

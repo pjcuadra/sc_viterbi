@@ -39,12 +39,39 @@ cd <project-root>/doc
 make html
 ```
 
-Finallay you can open the ```index.html``` file at
-```<project-root>/doc/build/html/index.html``` to navigate the documentation.
+Finally you can open the `index.html` file at
+`<project-root>/doc/build/html/index.html` to navigate the documentation.
 
 # Build the code
 
-TBD
+To install **SystemC**, first you have to install some dependencies, by running;
+
+```
+sudo apt-get install build-essential
+```
+
+Download **SystemC 2.3** from [here](https://github.com/systemc/systemc-2.3).
+After downloading, extract it. Now we need to compile and install it by running;
+
+```
+cd <extracted-dir>
+./configure --prefix=/usr/local/
+make
+sudo make install
+```
+
+Now you can build the code by running;
+
+```
+cd <your-sc_viterbi-src-code-path>
+mkdir build
+cd build
+cmake ..
+make
+```
+
+You can find more about how to build the code
+[here](http://sc-viterbi.readthedocs.io/en/latest/).
 
 # Design/Implementation Workflow
 

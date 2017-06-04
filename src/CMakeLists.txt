@@ -13,6 +13,6 @@
 # limitations under the License.
 
 # Add source directory
-add_sources_directory(common
+add_sources_directory(common/
                       encoder/
                       decoder/)
