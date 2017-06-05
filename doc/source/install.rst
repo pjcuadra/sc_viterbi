@@ -29,17 +29,6 @@ downloading, extract it. Now we need to compile and install it by running;
   sudo make install
 
 
-Now you can build the code by running;
-
-.. code::
-
-  cd <your-sc_viterbi-src-code-path>
-  mkdir build
-  cd build
-  cmake ..
-  make
-
-
 Using Docker
 ************
 
@@ -67,6 +56,16 @@ After it's downloaded you have to start the container by running;
 
   Don't forget to update the *<your-sc_viterbi-src-code-path>* placeholder.
 
+Once you have your docker running you can `ssh` into it as follows;
+
+.. code::
+
+  ssh root@127.0.0.1 -p 1122
+
+Inside the docker you'll find your code and you can build it as specified in
+the section `Build the code`_.
+
+
 Linux
 +++++
 
@@ -91,8 +90,26 @@ After it's downloaded you have to start the container by running;
 
   Don't forget to update the *<your-sc_viterbi-src-code-path>* placeholder.
 
+.. code::
 
-Set up Netbeans
-+++++++++++++++
+  ssh root@127.0.0.1 -p 1122
 
-TBD
+Inside the docker you'll find your code and you can build it as specified in
+the section `Build the code`_.
+
+Build the code
+--------------
+
+Now you can build the code by running;
+
+.. code::
+
+  cd <your-sc_viterbi-src-code-path>
+  mkdir build
+  cd build
+  cmake ..
+  make
+
+.. warning::
+  If you are building inside the docker image the
+  `<your-sc_viterbi-src-code-path>` is `/root/`.
