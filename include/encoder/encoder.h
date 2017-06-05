@@ -16,17 +16,27 @@
 #define ENCODER_H_
 
 #include<systemc.h>
+#include<common/shift_register.h>
 
-SC_MODULE (encoder) {
-  sc_in<bool> a, b, carry_in;
-  sc_out<bool> sum, carry_out;
+template<int output, int input, int memory>
+  SC_MODULE (encoder) {
+    /** Input CLK */
+    sc_in_clk clk;
+    /** Parallel input */
+    sc_in<sc_lv<input> > in;
+    /** Serial output */
+    sc_out<sc_logic > out;
+    /** Shift Registers */
+    shift_register<memory> register_bank[input];
 
-  void prc_encoder();
+    SC_CTOR (encoder) {
 
-  SC_CTOR (encoder) {
-    SC_METHOD (prc_encoder);
-    sensitive << a << b << carry_in;
-  }
-};
+      // Connect the input and clock of each shift register
+      for (int i = 0; i < input; i++) {
+        register_bank[i].data_in = in[i];
+        register_bank[i].clk = clk;
+      }
+    }
+  };
 
 #endif

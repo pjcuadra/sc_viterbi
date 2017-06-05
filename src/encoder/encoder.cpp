@@ -14,7 +14,6 @@
 
 #include<encoder/encoder.h>
 
-void encoder::prc_encoder () {
-  sum = (a ^ b) ^ carry_in;
-  carry_out = ((a ^ b) & carry_in) | (a & b);
-}
+// void encoder::prc_encoder () {
+//
+// }
