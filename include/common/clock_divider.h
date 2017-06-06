@@ -31,7 +31,7 @@ template<int ratio>
     int divider_counter;
 
     /**
-     * Shift register Process
+     * Clock divider Process
      */
     void prc_clock_divider () {
       if (divider_counter == 2 * ratio) {
