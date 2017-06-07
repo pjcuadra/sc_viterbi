@@ -32,15 +32,15 @@ template<int inputs>
     sc_out<sc_logic> ser_out;
     /** Output selector */
     uint output_selector;
-    /** Clock div */
-    clock_divider<inputs> * clk_div;
-    /** Temp store for the parallel input */
-    sc_lv<inputs> latch;
 
     /**
      * Serializer Process
      */
     void prc_serializer () {
+      sc_lv<inputs> latch;
+
+      latch = par_in;
+
       ser_out = latch[output_selector];
 
       output_selector++;
@@ -52,13 +52,6 @@ template<int inputs>
     }
 
     /**
-     * Latcher Process
-     */
-    void prc_latcher () {
-      latch = par_in;
-    }
-
-    /**
      * Constructor
      */
     SC_CTOR (serializer) {
@@ -67,9 +60,6 @@ template<int inputs>
 
       SC_METHOD (prc_serializer);
       sensitive << clk_in.pos();
-
-      SC_METHOD (prc_latcher);
-      sensitive << par_in;
 
     }
   };
