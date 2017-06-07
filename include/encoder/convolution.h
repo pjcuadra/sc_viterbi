@@ -31,15 +31,15 @@ template<int width>
     /** Logic vector of memory element */
     sc_in<sc_lv<width> > polynomial;
 
-    /** Temporary variables necessary for port operations */
-    sc_lv<width> output;
-    sc_lv<width> ip;
-    sc_lv<width> p;
 
     /**
      * Convolution Process (SC_METHOD)
      */
-    void calculate_conv_method(){
+    void prc_calculate_conv(){
+      /** Temporary variables necessary for port operations */
+      sc_lv<width> output;
+      sc_lv<width> ip;
+      sc_lv<width> p;
 
       ip = input.read();
       p = polynomial.read();
@@ -54,7 +54,7 @@ template<int width>
      * Constructor
      */
     SC_CTOR (convolution) {
-      SC_METHOD (calculate_conv_method);
+      SC_METHOD (prc_calculate_conv);
       dont_initialize();
       sensitive << input;
     }
