@@ -12,48 +12,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-#ifndef CLOCK_DEVIDER_H_
-#define CLOCK_DEVIDER_H_
+#ifndef SERIALIZER_H_
+#define SERIALIZER_H_
 
 #include<systemc.h>
+#include<common/clock_divider.h>
 
 /**
  * Shift register Template
  * @param width size of the shift register
  */
-template<int ratio>
-  SC_MODULE (clock_divider) {
+template<int inputs>
+  SC_MODULE (serializer) {
     /** Input CLK */
     sc_in_clk clk_in;
-    /** Output CLK */
-    sc_out_clk clk_out;
-    /** Devider Counter */
-    int divider_counter;
+    /** Parallel input */
+    sc_in<sc_lv<inputs> > par_in;
+    /** Serial output */
+    sc_out<sc_logic> ser_out;
+    /** Output selector */
+    uint output_selector;
 
     /**
-     * Clock divider Process
+     * Serializer Process
      */
-    void prc_clock_divider () {
-      if (divider_counter == 2 * ratio) {
-        clk_out = true;
-        divider_counter = 1;
-        return;
-      }
+    void prc_serializer () {
+      sc_lv<inputs> latch;
 
-      if ((divider_counter >= ratio) && clk_out) {
-        clk_out = false;
-      }
+      latch = par_in;
 
-      divider_counter++;
+      ser_out = latch[output_selector];
+
+      output_selector++;
+
+      // If selector overflows reset the counter
+      if (output_selector >= inputs) {
+        output_selector = 0;
+      }
     }
 
     /**
      * Constructor
      */
-    SC_CTOR (clock_divider) {
-      divider_counter = 2 * ratio;
-      SC_METHOD (prc_clock_divider);
-      sensitive << clk_in;
+    SC_CTOR (serializer) {
+
+      output_selector = 0;
+
+      SC_METHOD (prc_serializer);
+      sensitive << clk_in.pos();
+
     }
   };
 
