@@ -12,4 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_test_sources(convolution_ut.cpp)
+add_test_sources(convolution_ut.cpp
+                 encoder_ut.cpp
+                 convolution_shiftreg_ut)

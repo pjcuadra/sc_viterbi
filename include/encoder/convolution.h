@@ -46,7 +46,7 @@ template<int width>
       for(int i = 0; i < width; i++){
         output[i]=ip[i] & p[i];
       }
-      y=output.xor_reduce();
+      y = output.xor_reduce();
     }
 
 
