@@ -37,9 +37,9 @@ template<int width>
      */
     void prc_shift_register () {
       // Shift value
-      q_state.range(1, width - 1) = q_state.range(0, width - 2);
+      q_state.range(0, width - 2) = q_state.range(1, width - 1);
       // Take data into the register's state
-      q_state[0] = data_in;
+      q_state[width - 1] = data_in;
       // Link state to the output
       q = q_state;
     }
@@ -48,9 +48,7 @@ template<int width>
      * Constructor
      */
     SC_CTOR (shift_register) {
-      for (int i = 0; i < width; i++) {
-        q_state[i] = sc_logic('0');
-      }
+      q_state = sc_lv<width> (sc_logic_0);
       SC_METHOD (prc_shift_register);
       sensitive_pos << clk;
     }
