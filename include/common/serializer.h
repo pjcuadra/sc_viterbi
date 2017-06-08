@@ -16,7 +16,6 @@
 #define SERIALIZER_H_
 
 #include<systemc.h>
-#include<common/clock_divider.h>
 
 /**
  * Shift register Template
@@ -31,7 +30,7 @@ template<int inputs>
     /** Serial output */
     sc_out<sc_logic> ser_out;
     /** Output selector */
-    uint output_selector;
+    int output_selector;
 
     /**
      * Serializer Process
@@ -43,11 +42,11 @@ template<int inputs>
 
       ser_out = latch[output_selector];
 
-      output_selector++;
+      output_selector--;
 
       // If selector overflows reset the counter
-      if (output_selector >= inputs) {
-        output_selector = 0;
+      if (output_selector < 0) {
+        output_selector = inputs - 1;
       }
     }
 
@@ -56,7 +55,7 @@ template<int inputs>
      */
     SC_CTOR (serializer) {
 
-      output_selector = 0;
+      output_selector = inputs - 1;
 
       SC_METHOD (prc_serializer);
       sensitive << clk_in.pos();
