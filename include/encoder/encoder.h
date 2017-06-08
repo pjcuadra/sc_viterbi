@@ -144,6 +144,7 @@ template<int output, int input, int memory>
       serial->clk_in(clk);
       serial->par_in(conv_par_bus);
       serial->ser_out(out);
+      serial->ser_trig(clk_div);
 
       SC_METHOD(prc_split_input)
       sensitive << in;

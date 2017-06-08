@@ -23,6 +23,7 @@ static const int inputs = 8;
 SC_TEST(serializer) {
   sc_clock sys_clock("sys_clock", clock_period, clock_duty, clock_start, false);
   sc_signal<sc_logic> ser_out;
+  sc_signal<bool> ser_trig;
   sc_signal<sc_lv<inputs> > par_in;
 
   par_in = "10010010";
@@ -30,12 +31,21 @@ SC_TEST(serializer) {
   SC_TRACE(sys_clock, "sys_clock");
   SC_TRACE(ser_out, "ser_out");
   SC_TRACE(par_in, "par_in");
+  SC_TRACE(ser_trig, "ser_trig");
+
 
   serializer<inputs> serializer ("Serializer");
   serializer.ser_out(ser_out);
   serializer.clk_in(sys_clock);
   serializer.par_in(par_in);
+  serializer.ser_trig(ser_trig);
 
-  sc_start(350, SC_NS);
+
+  ser_trig = false;
+  sc_start(50, SC_NS);
+
+  ser_trig = true;
+  sc_start(400, SC_NS);
+
 
 }

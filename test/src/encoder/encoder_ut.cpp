@@ -70,7 +70,7 @@ SC_TEST(encoder) {
 
   in = "0";
   sc_start(2*clock_period, SC_NS);
-  
+
   in = "1";
   sc_start(2*clock_period, SC_NS);
 
