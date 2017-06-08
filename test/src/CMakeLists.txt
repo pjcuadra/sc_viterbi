@@ -14,4 +14,5 @@
 
 # Add test directory
 add_test_sources_directory(common
-                           encoder)
+                           encoder
+                           decoder)

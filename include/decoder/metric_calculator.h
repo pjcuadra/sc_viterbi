@@ -29,23 +29,33 @@ template<int width>
     sc_in<sc_lv<width> > expected_codeword;
     /** Value of predecessor path metric  */
     sc_in<int> predecessor_path_metric;
-    /** Output(logic) of metric_calculator block */
+    /** Output(int) of metric_calculator block */
     sc_out<int> branch_metric;
-    /** Output(logic) of metric_calculator block */
+    /** Output(int) of metric_calculator block */
     sc_out<int> path_metric;
+    /** Output(vector) of metric_calculator block--testing purpose */
+    sc_out<sc_lv<width> > xor_op;
 
-    /** Temporary variables necessary for port operations */
-    sc_lv<width> output;
-    int br_met;
-    int pp_met;
-    int count;
 
     /**
      * Calculation Processes for Hamming Metric (SC_METHOD)
      */
-    void calculate_hamming_metric_method(){
+    void prc_calculate_hamming_metric_method(){
+      /** Temporary variables necessary for port operations */
+      sc_lv<width> output;
+      sc_lv<width> rx;
+      sc_lv<width> cw;
+      int count;
 
-      output = received ^ expected_codeword;
+      // Read inputs
+      rx = received.read();
+      cw = expected_codeword.read();
+
+      // Calculation of EX-NOR for hamming matrix
+      output = ~( rx ^ cw );
+      // Test signal (as integer values of branch and path metrices can't be plotted )
+      xor_op = output;
+
       for(int i = 0; i < width; i++){
         if (output[i]=='1'){
           count++;
@@ -54,17 +64,23 @@ template<int width>
           //do nothing
         }
       }
+      // Get branch metric
       branch_metric = count;
     }
 
     /**
      * Calculation Processes for Path Metric (SC_METHOD)
      */
-    void calculate_path_metric_method(){
+    void prc_calculate_path_metric_method(){
+      /** Temporary variables necessary for port operations */
+      int br_met;
+      int pp_met;
 
+      // Read inputs
       br_met = branch_metric.read();
       pp_met = predecessor_path_metric.read();
-      
+
+      // Get path metric
       path_metric = br_met + pp_met;
     }
 
@@ -72,11 +88,11 @@ template<int width>
      * Constructor
      */
     SC_CTOR (metric_calculator) {
-      SC_METHOD (calculate_hamming_metric_method);
+      SC_METHOD (prc_calculate_hamming_metric_method);
       dont_initialize();
       sensitive << received;
 
-      SC_METHOD (calculate_path_metric_method);
+      SC_METHOD (prc_calculate_path_metric_method);
       dont_initialize();
       sensitive << branch_metric << predecessor_path_metric;
     }

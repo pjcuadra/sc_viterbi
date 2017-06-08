@@ -75,9 +75,10 @@ SC_TEST(metric_calculator) {
   sc_signal<int> branch;
   sc_signal<int> path;
   sc_signal<int> predecessor_path;
+  sc_signal<sc_lv<input_bit_width> > xor_output;//for testing only
 
   // create module
-  metric_calculator<input_bit_width> metric_calculator("Convolution");
+  metric_calculator<input_bit_width> metric_calculator("Metric Calculator");
 
   // connect channels to ports of "convolution"
   metric_calculator.received(received_bits);
@@ -85,31 +86,34 @@ SC_TEST(metric_calculator) {
   metric_calculator.branch_metric(branch);
   metric_calculator.predecessor_path_metric(predecessor_path);
   metric_calculator.path_metric(path);
+  metric_calculator.xor_op(xor_output);//for testing only
 
   cout << "Metric Calculation" << endl;
 
   // create trace of signals
   SC_TRACE(received_bits, "received_bits");
   SC_TRACE(expected_bits, "expected_bits");
-  SC_TRACE(branch, "branch metric");
-  SC_TRACE(predecessor_path, "predecessor path metric");
-  SC_TRACE(path, "path metric");
+  SC_TRACE(xor_output, "hamming_metric");
+  //SC_TRACE(branch, "branch metric");
+  //SC_TRACE(predecessor_path, "predecessor path metric");
+  //SC_TRACE(path, "path metric");
 
   // start simulation
   received_bits = "10";
   expected_bits = "11";
   predecessor_path = 4;
   sc_start(100, SC_NS);
+  cout << "calculated path" << path << "calculated branch" << branch << endl;
 
-  cout << "Shift and Convolved" << path << endl;
   received_bits = "11";
   expected_bits = "10";
   predecessor_path = 5;
   sc_start(100, SC_NS);
+  cout << "calculated path" << path << "calculated branch" << branch << endl;
 
-  cout << "Shift and Convolved" << path << endl;
-  received_bits = "11";
+  received_bits = "00";
   expected_bits = "10";
   predecessor_path = 4;
   sc_start(100, SC_NS);
+  cout << "calculated path" << path << "calculated branch" << branch << endl;
 }
