@@ -87,7 +87,7 @@ SC_TEST(comparator) {
   // create trace of signals
   SC_TRACE(first_entity, "first_entity");
   SC_TRACE(second_entity, "second_entity");
-  SC_TRACE(max, "maximum entity");
+  SC_TRACE(max, "maximum_entity");
 
   // start simulation
   first_entity = 5;
