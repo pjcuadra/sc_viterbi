@@ -32,12 +32,13 @@ template<class T1, class T2>
 
 
     /**
-     * Calculation Processes for Hamming Metric (SC_METHOD)
+     * Calculation Processes for Comparision to get maximum entity (SC_METHOD)
      */
     void prc_comparision_method(){
 
     /** Temporary variables necessary for port operations */
     T1 output;
+    
     output = (first_entity < second_entity) ? second_entity : first_entity;
     maximum = output;
     }
