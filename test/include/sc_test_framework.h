@@ -26,6 +26,7 @@
 #endif
 
 #define SC_TRACE(signal, name) sc_trace(this->tf, signal, name)
+#define SC_STRACE(signal) sc_trace(this->tf, signal, #signal)
 
 #define SC_TEST(test_name) static sc_unit_test * test = new sc_unit_test(#test_name); \
   int sc_main(int argc, char* argv[]) { \
