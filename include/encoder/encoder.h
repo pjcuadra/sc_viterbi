@@ -29,12 +29,12 @@ template<int output, int input, int memory>
     /** Parallel input */
     sc_in<sc_lv<input> > in;
     /** Polynomials input */
-    sc_in<sc_lv<memory> > polynomials[output];
+    sc_in<sc_lv<memory * input> > polynomials[output];
     // Outputs
     /** Serial output */
     sc_out<sc_logic > out;
     /** Arranged for convolution memory bus */
-    sc_out<sc_lv<memory * input> > mem_bus_conv;
+    sc_signal<sc_lv<memory * input> > mem_bus_conv;
     // Internal Signals
     /** Divided clk signal */
     sc_signal<bool> clk_div;

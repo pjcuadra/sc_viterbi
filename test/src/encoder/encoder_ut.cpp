@@ -14,6 +14,7 @@
 
 #include <sc_test_framework.h>
 #include <encoder/encoder.h>
+#include <encoder/encoder_lkup.h>
 #include <sstream>
 
 static const int n = 2;
@@ -30,7 +31,8 @@ SC_TEST(encoder) {
 
   // Create signals
   sc_signal<sc_lv<k> > in; //logic vector for shift register
-  sc_signal<sc_logic> out; //logic output of output of convolution
+  sc_signal<sc_logic> out_0; //logic output of output of convolution
+  sc_signal<sc_logic> out_1; //logic output of output of convolution
   sc_signal<sc_lv<m> > mem_bus[k]; //logic vector for shift register
   sc_signal<sc_lv<m * k> > mem_bus_conv; //logic vector for shift register
   sc_signal<sc_logic> serial_in_drv[n];
@@ -38,28 +40,44 @@ SC_TEST(encoder) {
 
   // Create module
   encoder<n, k, m> vencoder("ViterbiEncoder");
+  encoder_lkup<n, k, m> vencoder_lkup("ViterbiEncoderLKUP");
 
   // Assign polynomials
   polynomials[0] = "1111";
   polynomials[1] = "1101";
 
-  SC_TRACE(sys_clock, "sys_clock");
-  SC_TRACE(in, "in");
-  SC_TRACE(out, "out");
-  SC_TRACE(mem_bus_conv, "mem_bus_conv");
+  SC_STRACE(vencoder.clk);
+  SC_STRACE(vencoder.in);
+  SC_STRACE(vencoder.out);
+  SC_STRACE(vencoder.mem_bus_conv);
+
+  SC_STRACE(vencoder_lkup.clk);
+  SC_STRACE(vencoder_lkup.in);
+  SC_STRACE(vencoder_lkup.out);
 
   for (int i = 0; i < n; i++) {
     std::stringstream pol_name;
-    pol_name << "polynimial(" << i << ")";
+
+    pol_name.str("vencoder");
+    pol_name << ".polynimial(" << i << ")";
 
     SC_TRACE(polynomials[i], pol_name.str());
     vencoder.polynomials[i](polynomials[i]);
+
+    pol_name.str("vencoder_lkup");
+    pol_name << ".polynimial(" << i << ")";
+
+    SC_TRACE(polynomials[i], pol_name.str());
+    vencoder_lkup.polynomials[i](polynomials[i]);
   }
 
   vencoder.clk(sys_clock);
   vencoder.in(in);
-  vencoder.out(out);
-  vencoder.mem_bus_conv(mem_bus_conv);
+  vencoder.out(out_0);
+
+  vencoder_lkup.clk(sys_clock);
+  vencoder_lkup.in(in);
+  vencoder_lkup.out(out_1);
 
   // Impulse Response
   in = "0";
@@ -79,6 +97,5 @@ SC_TEST(encoder) {
 
   in = "0";
   sc_start(200, SC_NS);
-
 
 }
