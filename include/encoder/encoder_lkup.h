@@ -81,7 +81,7 @@ template<int output, int input, int memory>
 
       // Invert the order of bits
       for (int o = 0; o < output; o++) {
-        polynomials_tmp[o] = polynomials[o];
+        polynomials_tmp[o] = polynomials[output - o -1];
       }
 
       create_output_lkup<output, input, memory>(polynomials_tmp, output_lkp);

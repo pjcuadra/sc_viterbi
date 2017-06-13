@@ -50,6 +50,13 @@ SC_TEST(encoder) {
   SC_STRACE(vencoder.in);
   SC_STRACE(vencoder.out);
   SC_STRACE(vencoder.mem_bus_conv);
+  SC_STRACE(vencoder.clk_div);
+  SC_STRACE(vencoder.clk_divider->clk_out);
+  SC_STRACE(vencoder.serial->ser_out);
+  SC_STRACE(vencoder.serial->par_in);
+  SC_STRACE(vencoder.serial->ser_trig);
+  SC_STRACE(vencoder.serial->output_selector);
+
 
   SC_STRACE(vencoder_lkup.clk);
   SC_STRACE(vencoder_lkup.in);

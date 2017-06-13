@@ -28,13 +28,11 @@ template<int inputs>
     /** Parallel input */
     sc_in<sc_lv<inputs> > par_in;
     /** Serializing trigger */
-    sc_in<bool> ser_trig;
+    sc_in_clk ser_trig;
     /** Serial output */
     sc_out<sc_logic> ser_out;
     /** Output selector */
-    uint output_selector;
-    /** Serializing flag to serialize just once per trigger */
-    bool serializing;
+    int output_selector;
 
     /**
      * Serializer Process
@@ -42,41 +40,52 @@ template<int inputs>
     void prc_serializer () {
       sc_lv<inputs> latch;
 
-      latch = par_in;
+      // Wait for the parallel input to stabilize
+      next_trigger(1, SC_NS);
 
-      ser_out = serializing & latch[output_selector];
+      latch = par_in.read();
 
-      if (output_selector == 0) {
-        serializing =  false;
+      ser_out.write(latch[output_selector]);
+
+      if (output_selector == -1) {
+        ser_out = sc_logic('0');
+        return;
+      }
+
+    }
+
+    /**
+     * Update the counter
+     */
+    void prc_serializer_counter_update () {
+      if (output_selector == -1) {
+        return;
       }
 
       output_selector--;
     }
 
     /**
-     * Serializer Process
+     * Reset the counter
      */
-    void prc_serializer_trig_catch () {
-      if (ser_trig) {
-        output_selector = inputs - 1;
-        serializing = true;
-      }
+    void prc_serializer_counter_reset () {
+      output_selector = inputs - 1;
     }
 
     /**
      * Constructor
      */
     SC_CTOR (serializer) {
-      output_selector = 0;
-      serializing = false;
+      output_selector = inputs;
 
-      SC_METHOD (prc_serializer_trig_catch);
-      sensitive << ser_trig;
+      SC_METHOD (prc_serializer)
+      sensitive << clk_in.pos() << ser_trig.pos();
 
-      SC_METHOD (prc_serializer);
+      SC_METHOD (prc_serializer_counter_update)
       sensitive << clk_in.pos();
 
-
+      SC_METHOD (prc_serializer_counter_reset)
+      sensitive << ser_trig.pos();
 
     }
   };

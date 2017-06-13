@@ -80,6 +80,7 @@ template<int output, int input, int memory>
       }
 
       conv_par_bus = ser_in_tmp;
+
     }
 
     /**
@@ -133,7 +134,7 @@ template<int output, int input, int memory>
         conv_block[o] = new convolution<memory * input>("conv_" + o);
         conv_block[o]->input(mem_bus_conv);
         conv_block[o]->y(conv_outs[o]);
-        conv_block[o]->polynomial(polynomials[o]);
+        conv_block[o]->polynomial(polynomials[output - o - 1]);
       }
 
       // Initialize to zeros
