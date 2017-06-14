@@ -27,13 +27,10 @@ SC_TEST(serializer) {
   sc_signal<bool> ser_trig;
   sc_signal<sc_lv<inputs> > par_in;
 
-
-
   SC_STRACE(sys_clock);
   SC_STRACE(ser_out);
   SC_STRACE(par_in);
   SC_STRACE(ser_trig);
-
 
   clock_divider<inputs> clk_div ("CLK_DIV");
 
@@ -45,10 +42,6 @@ SC_TEST(serializer) {
   serializer.clk_in(sys_clock);
   serializer.par_in(par_in);
   serializer.ser_trig(ser_trig);
-
-  SC_STRACE(serializer.output_selector);
-  SC_STRACE(serializer.rev_selector);
-  SC_STRACE(serializer.latch);
 
   par_in = sc_lv<inputs>("00000000");
   sc_start(125, SC_NS);
