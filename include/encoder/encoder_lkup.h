@@ -32,7 +32,7 @@ template<int output, int input, int memory>
     sc_out<sc_logic > out;
     // Internal Signals
     /** Lookup table size */
-    const static uint lookup_size = 1 << (memory + input);
+    const static uint lookup_size = input << memory;
     /** Current State */
     sc_lv<memory * input> curr_state;
     /** Next state lookup table */
@@ -63,7 +63,7 @@ template<int output, int input, int memory>
       in_tmp = in.read();
 
       // Build the lookup address
-      lkup_address = (curr_state_int << input) | in_tmp.to_uint();
+      lkup_address = (lookup_size - 1) & ((curr_state_int << input) | in_tmp.to_uint());
 
       // Get the next state
       curr_state = next_state_lkp[lkup_address];

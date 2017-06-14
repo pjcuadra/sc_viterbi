@@ -38,7 +38,7 @@ template <int size>
 template <int output, int input, int memory>
   inline void create_states_lkup(sc_lv<memory * input> * next_state_lkp) {
 
-    const static uint lookup_size = 1 << (memory + input);
+    const static uint lookup_size = input << memory;
 
     // Initialize the lookup table
     for (uint i = 0; i < lookup_size; i++) {
@@ -54,7 +54,7 @@ template <int output, int input, int memory>
 template <int output, int input, int memory>
   inline void create_output_lkup(sc_lv<memory * input> polynomials[output], sc_lv<output> * output_lkp) {
 
-    const static uint lookup_size = 1 << (memory + input);
+    const static uint lookup_size = input << memory;
 
     // Interate over all entries of the lookup table
     for (uint mem = 0; mem < lookup_size; mem++) {
