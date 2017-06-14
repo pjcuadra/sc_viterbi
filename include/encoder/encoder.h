@@ -29,12 +29,12 @@ template<int output, int input, int memory>
     /** Parallel input */
     sc_in<sc_lv<input> > in;
     /** Polynomials input */
-    sc_in<sc_lv<memory> > polynomials[output];
+    sc_in<sc_lv<memory * input> > polynomials[output];
     // Outputs
     /** Serial output */
     sc_out<sc_logic > out;
     /** Arranged for convolution memory bus */
-    sc_out<sc_lv<memory * input> > mem_bus_conv;
+    sc_signal<sc_lv<memory * input> > mem_bus_conv;
     // Internal Signals
     /** Divided clk signal */
     sc_signal<bool> clk_div;
@@ -80,6 +80,7 @@ template<int output, int input, int memory>
       }
 
       conv_par_bus = ser_in_tmp;
+
     }
 
     /**
@@ -133,7 +134,7 @@ template<int output, int input, int memory>
         conv_block[o] = new convolution<memory * input>("conv_" + o);
         conv_block[o]->input(mem_bus_conv);
         conv_block[o]->y(conv_outs[o]);
-        conv_block[o]->polynomial(polynomials[o]);
+        conv_block[o]->polynomial(polynomials[output - o - 1]);
       }
 
       // Initialize to zeros
