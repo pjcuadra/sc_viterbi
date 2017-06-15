@@ -33,19 +33,17 @@ SC_TEST(decoder) {
   sc_clock sys_clock("sys_clock", clock_period, clock_duty, clock_start, false);
 
   // Create signals
-  sc_signal<sc_logic> in; //logic vector for shift register
-  sc_signal<sc_logic> out; //logic output of output of convolution
-  // sc_signal<sc_logic> out_1; //logic output of output of convolution
-  // sc_signal<sc_lv<m> > mem_bus[k]; //logic vector for shift register
-  // sc_signal<sc_lv<m * k> > mem_bus_conv; //logic vector for shift register
-  // sc_signal<sc_logic> serial_in_drv[n];
+  sc_signal<sc_logic> in;
+  sc_signal<sc_logic> out;
+  sc_lv<4> expected_out;
   sc_signal<sc_lv<m> > polynomials[n];
   sc_lv<output_size> in_bus;
   sc_signal<bool> trigger;
+  uint current_check_time;
 
   in_bus = "11110111010111";
 
-  // out_bus = "1011";
+  expected_out = "1011";
 
   // Create module
   decoder_viterbi<n, k, m, out_buff> vdecoder("ViterbiDecoder");
@@ -87,35 +85,23 @@ SC_TEST(decoder) {
     SC_TRACE(vdecoder.trellis_tree_lkup[0][i], trellis_node.str().c_str());
   }
 
-  // // Input verification (1011)
-  // current_check_time = stimulus_start - 1;
-  // SC_EXPECT_AT(sc_lv<k>(sc_logic('0')), in, current_check_time, SC_NS);
-  // current_check_time += clock_period;
-  // for (int i = 0; i < m; i++) {
-  //   SC_EXPECT_AT(sc_lv<k>(sc_logic(input_out.get_bit(m - i -1))), in, current_check_time, SC_NS);
-  //   current_check_time += 2 * clock_period;
-  // }
-  //
-  // // Output verification (11110111010111)
-  // current_check_time = 220;
-  // SC_EXPECT_AT(sc_logic('0'), out_0, current_check_time, SC_NS);
-  // SC_EXPECT_AT(sc_logic('0'), out_1, current_check_time, SC_NS);
-  // current_check_time += clock_period / 2;
-  //
-  // for (int i = 0; i < output_size; i++) {
-  //   SC_EXPECT_AT(sc_logic(expected_out.get_bit(output_size - i -1)), out_0, current_check_time, SC_NS);
-  //   SC_EXPECT_AT(sc_logic(expected_out.get_bit(output_size - i -1)), out_1, current_check_time, SC_NS);
-  //   current_check_time += clock_period;
-  // }
+  // Output verification (1011)
+  current_check_time = 312;
+  SC_EXPECT_AT(sc_logic('0'), out, current_check_time, SC_NS);
+  current_check_time += clock_period;
+  for (int i = 0; i < m; i++) {
+    SC_EXPECT_AT(sc_logic(expected_out.get_bit(m - i -1)), out, current_check_time, SC_NS);
+    current_check_time += clock_period;
+  }
 
-  // Impulse Response
-  // in = "0";
-  // sc_start(stimulus_start, SC_NS);
-  //
-  // for (int i = 0; i < m; i++) {
-  //   in = sc_lv<k>(sc_logic(input_out.get_bit(m - i -1)));
-  //   sc_start(2*clock_period, SC_NS);
-  // }
+  current_check_time = 1010;
+  SC_EXPECT_AT(sc_logic('0'), out, current_check_time, SC_NS);
+  current_check_time += clock_period;
+  for (int i = 0; i < m; i++) {
+    SC_EXPECT_AT(sc_logic(expected_out.get_bit(m - i -1)), out, current_check_time, SC_NS);
+    current_check_time += clock_period;
+  }
+
 
   trigger = false;
   in = sc_logic('0');
@@ -147,8 +133,5 @@ SC_TEST(decoder) {
   trigger = false;
 
   sc_start(500, SC_NS);
-
-
-  exit(1);
 
 }

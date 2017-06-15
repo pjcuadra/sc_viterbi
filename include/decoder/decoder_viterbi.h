@@ -124,16 +124,12 @@ template<int output, int input, int memory, int output_buffer_bit_size>
         return;
       }
 
-      cout << "Stage: " << curr_trellis_stage << endl;
-      cout << "  Sel. Input: " << par_in.read().to_uint() << endl;
       for (int state_row = 0; state_row < states_num; state_row++) {
         curr_path = trellis_tree_lkup[CURR_STAGE][state_row];
 
         if (!curr_path.is_alive) {
           continue;
         }
-
-        cout << "  State " << state_row << endl;
 
         // Iterate over all possible inputs
         for (int p_in = 0; p_in < (1 << input); p_in++) {
@@ -143,10 +139,6 @@ template<int output, int input, int memory, int output_buffer_bit_size>
 
           new_metrics = curr_path.metric_value;
           new_metrics += get_metrics(par_in.read().to_uint(), output_lkp[lkup_address].to_uint());
-
-          cout << "    Input " << p_in << endl;
-          cout << "    Metric " << new_metrics << endl;
-          cout << "    Next State " << next_state_index << endl;
 
           if (next_state.metric_value > new_metrics) {
             continue;
