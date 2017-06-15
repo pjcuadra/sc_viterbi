@@ -94,7 +94,7 @@ template<int output, int input, int memory>
       viterbi_path_s<output, input, memory> curr_path;
       viterbi_path_s<output, input, memory> next_state;
       uint new_metrics = 0;
-      uint next_state_index = 0;
+      sc_uint<states_num> next_state_index = 0;
 
       if (!this->trigger) {
         return;
@@ -107,6 +107,8 @@ template<int output, int input, int memory>
 
       // Iterate over the entire input
       for (int input_selector = 0; input_selector < input_width; input_selector += 2) {
+        cout << "Stage: " << input_selector / output << endl;
+        cout << "  Sel. Input: " << in_bus[input_selector / output].to_uint() << endl;
         for (int state_row = 0; state_row < states_num; state_row++) {
           curr_path = trellis_tree_lkup[CURR_STAGE][state_row];
 
@@ -114,14 +116,20 @@ template<int output, int input, int memory>
             continue;
           }
 
+          cout << "  State " << state_row << endl;
+
           // Iterate over all possible inputs
           for (int p_in = 0; p_in < (1 << input); p_in++) {
             lkup_address = (lookup_size - 1) & ((state_row << input) | p_in);
-            next_state_index = ((lookup_size >> 1) - 1) & next_state_lkp[lkup_address].to_uint();
+            next_state_index = (states_num - 1) & next_state_lkp[lkup_address].to_uint();
             next_state = trellis_tree_lkup[NEXT_STAGE][next_state_index];
 
             new_metrics = curr_path.metric_value;
             new_metrics += get_metrics(in_bus[input_selector / output].to_uint(), output_lkp[lkup_address].to_uint());
+
+            cout << "    Input " << in_bus[input_selector / output].to_uint() << endl;
+            cout << "    Metric " << new_metrics << endl;
+            cout << "    Next State " << next_state_index << endl;
 
             if (next_state.metric_value > new_metrics) {
               continue;
@@ -131,7 +139,7 @@ template<int output, int input, int memory>
 
             next_state.metric_value = new_metrics;
             // Push the state to the list (array)
-            next_state.states_path[next_state.path_size++] = next_state_index;
+            next_state.path_output[next_state.path_size++] = next_state_index[0];
 
             trellis_tree_lkup[NEXT_STAGE][next_state_index] = next_state;
           }
@@ -170,7 +178,7 @@ template<int output, int input, int memory>
      * Build the output lookup table based on polynimials
      */
     void prc_update_output() {
-      sc_lv<output_width> output_bus;
+      sc_uint<output_width> output_bus;
       viterbi_path_s<output, input, memory> curr_path = trellis_tree_lkup[CURR_STAGE][5];
 
       for (int state_row = 0; state_row < states_num; state_row++) {
@@ -183,15 +191,8 @@ template<int output, int input, int memory>
         }
       }
 
-      if (curr_path.path_size > 0) {
-        cout << " +- Selected Path: " << endl;
-        for (int i = 0; i < curr_path.path_size; i++) {
-          cout << " | +- Node: " << curr_path.states_path[i] << endl;
-        }
-      }
-
       for (int path_item_index = 0; path_item_index < output_width; path_item_index++) {
-        output_bus[output_width - path_item_index - 1] = (curr_path.states_path[path_item_index + 1] & 0x1) ? sc_logic('1') : sc_logic('0');
+        output_bus[output_width - path_item_index - 1] = curr_path.path_output[path_item_index + 1];
       }
 
       out = output_bus;
@@ -215,7 +216,7 @@ template<int output, int input, int memory>
       // Initlialize the first trellis diagram item
       trellis_tree_lkup[0][0].path_size = 1;
       trellis_tree_lkup[0][0].metric_value = 0;
-      trellis_tree_lkup[0][0].states_path[0] = 0;
+      trellis_tree_lkup[0][0].path_output = 0;
       trellis_tree_lkup[0][0].is_alive = true;
 
       SC_METHOD (prc_decode_viterbi);

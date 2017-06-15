@@ -43,8 +43,8 @@ SC_TEST(decoder) {
   sc_signal<sc_lv<7> > out_bus;
   sc_signal<bool> trigger;
 
-  // in_bus = "11110111010111";
-  in_bus = "01100111010110";
+  in_bus = "11110111010111";
+  // in_bus = "01100111010110";
   // out_bus = "1011";
 
   // Create module
@@ -59,6 +59,7 @@ SC_TEST(decoder) {
   SC_STRACE(vdecoder.in);
   SC_STRACE(vdecoder.out);
   SC_STRACE(vdecoder.trigger);
+  SC_TRACE(vdecoder.trellis_tree_lkup[0][0], "first_node");
 
   for (int i = 0; i < n; i++) {
     std::stringstream pol_name;
@@ -108,5 +109,7 @@ SC_TEST(decoder) {
   sc_start(50, SC_NS);
   trigger = true;
   sc_start(500, SC_NS);
+
+  exit(1);
 
 }

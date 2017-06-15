@@ -16,6 +16,7 @@
 #define VITERBI_PATH_H_
 
 #include <systemc.h>
+#include <sysc/utils/sc_string.h>
 #include <common/util.h>
 #include <sstream>
 #include <bitset>
@@ -26,6 +27,7 @@
 
 #define MAX_PATH_LENGTH 100
 #define MAX_PATH_WIDTH 32
+#define MAX_OUTPUT_WIDTH 32
 #define MAX_METRIC_WIDTH 32
 
 template<int output, int input, int memory>
@@ -35,7 +37,7 @@ template<int output, int input, int memory>
     /** Size of the path */
     sc_uint<MAX_PATH_WIDTH> path_size;
     /** Path */
-    sc_uint<input << memory> states_path[MAX_PATH_LENGTH];
+    sc_uint<MAX_OUTPUT_WIDTH> path_output;
     /** Valid flag */
     bool is_alive;
 
@@ -45,9 +47,7 @@ template<int output, int input, int memory>
     inline viterbi_path_s& operator= (const viterbi_path_s& obj) {
       metric_value = obj.metric_value;
       path_size = obj.path_size;
-      for (int i = 0; i < MAX_PATH_LENGTH; i++) {
-        states_path[i] = obj.states_path[i];
-      }
+      path_output = obj.path_output;
       is_alive = obj.is_alive;
     }
 
@@ -61,12 +61,19 @@ template<int output, int input, int memory>
       ret_val &= (metric_value == obj.metric_value);
       ret_val &= (path_size == obj.path_size);
       ret_val &= (is_alive == obj.is_alive);
-
-      for (int i = 0; i < MAX_PATH_LENGTH; i++) {
-        ret_val &= (states_path[i] == obj.states_path[i]);
-      }
+      ret_val &= (path_output == obj.path_output);
 
       return ret_val;
+    }
+
+    inline friend void sc_trace(sc_trace_file * tf, const viterbi_path_s<output, input, memory>& obj, const std::string& name) {
+      std::stringstream ss;
+
+      sc_trace(tf, obj.metric_value, name + ".metric");
+      sc_trace(tf, obj.is_alive, name + ".is_alive");
+      sc_trace(tf, obj.path_size, name + ".path_size");
+      sc_trace(tf, obj.path_output, name + ".output");
+
     }
 
   };
