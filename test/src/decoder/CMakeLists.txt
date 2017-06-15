@@ -12,7 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Add test directory
-add_test_sources_directory(common
-                           encoder
-                           decoder)
+add_test_sources(metric_calculator_ut.cpp)
