@@ -18,13 +18,15 @@
 #include <systemc.h>
 #include <common/util.h>
 #include <decoder/viterbi_path.h>
+#include <common/shift_register.h>
+#include <common/clock_divider.h>
 #include <bitset>
 
 #define CURR_STAGE 0
 #define NEXT_STAGE 1
 #define MAX_STAGES 2
 
-template<int output, int input, int memory>
+template<int output, int input, int memory, int output_buffer_bit_size>
   SC_MODULE (decoder_viterbi) {
     // Constants
     /** With of the input */
@@ -37,7 +39,7 @@ template<int output, int input, int memory>
     static const uint output_width = input_width / output;
     // Inputs
     /** Parallel Input */
-    sc_in<sc_lv<input_width> > in;
+    sc_in<sc_logic> in;
     /** Input clock */
     sc_in_clk clk;
     /** Decoding trigger */
@@ -46,16 +48,33 @@ template<int output, int input, int memory>
     sc_in<sc_lv<memory * input> > polynomials[output];
     // Outputs
     /** Parallel Output */
-    sc_out<sc_lv<output_width> > out;
+    sc_out<sc_logic> out;
     /** Trellis State Table */
-    viterbi_path_s<output, input, memory> trellis_tree_lkup[MAX_STAGES][states_num];
+    viterbi_path_s<output_buffer_bit_size> trellis_tree_lkup[MAX_STAGES][states_num];
     /** Next state lookup table */
     sc_lv<memory * input> next_state_lkp[lookup_size];
     /** Output lookup table */
     sc_lv<output> output_lkp[lookup_size];
+    // Sub modules
+    /** Clock divider */
+    clock_divider<output> * clk_divider;
+    /** Shift Registers */
+    shift_register<output> * shift_reg;
+    // Internal Signal
+    /** Divided clk signal */
+    sc_signal<bool> clk_div;
+    sc_signal<bool> clk_div_en;
+    sc_signal<bool> decode_done;
+    /** Parallel Input */
+    sc_signal<sc_lv<output> > par_in;
     // Events
     /** Result ready event */
     sc_event res_ready;
+    uint trellis_stage;
+    sc_uint<16> serializer_count;
+    bool decoding;
+    bool serializing;
+
 
     /**
      * Calculate the metrics given 2 values
@@ -88,73 +107,68 @@ template<int output, int input, int memory>
      * Decode a parallel input using Viterbi algorithm
      */
     void prc_decode_viterbi() {
-      sc_lv<input_width> in_tmp = in;
-      sc_lv<output> in_bus[output_width];
       sc_uint<memory + input> lkup_address;
-      viterbi_path_s<output, input, memory> curr_path;
-      viterbi_path_s<output, input, memory> next_state;
+      viterbi_path_s<output_buffer_bit_size> curr_path;
+      viterbi_path_s<output_buffer_bit_size> next_state;
       uint new_metrics = 0;
       sc_uint<states_num> next_state_index = 0;
 
-      if (!this->trigger) {
+      if (!decoding) {
         return;
       }
 
-      // Create independent buses for every output bundle
-      for (int i = 0; i < output_width; i++) {
-        in_bus[output_width - i - 1] = in_tmp.range(2*i, 2*i +1);
+      trellis_stage++;
+
+      if (trellis_stage > output_buffer_bit_size) {
+        return;
       }
 
-      // Iterate over the entire input
-      for (int input_selector = 0; input_selector < input_width; input_selector += 2) {
-        cout << "Stage: " << input_selector / output << endl;
-        cout << "  Sel. Input: " << in_bus[input_selector / output].to_uint() << endl;
-        for (int state_row = 0; state_row < states_num; state_row++) {
-          curr_path = trellis_tree_lkup[CURR_STAGE][state_row];
+      cout << "Stage: " << trellis_stage << endl;
+      cout << "  Sel. Input: " << par_in.read().to_uint() << endl;
+      for (int state_row = 0; state_row < states_num; state_row++) {
+        curr_path = trellis_tree_lkup[CURR_STAGE][state_row];
 
-          if (!curr_path.is_alive) {
+        if (!curr_path.is_alive) {
+          continue;
+        }
+
+        cout << "  State " << state_row << endl;
+
+        // Iterate over all possible inputs
+        for (int p_in = 0; p_in < (1 << input); p_in++) {
+          lkup_address = (lookup_size - 1) & ((state_row << input) | p_in);
+          next_state_index = (states_num - 1) & next_state_lkp[lkup_address].to_uint();
+          next_state = trellis_tree_lkup[NEXT_STAGE][next_state_index];
+
+          new_metrics = curr_path.metric_value;
+          new_metrics += get_metrics(par_in.read().to_uint(), output_lkp[lkup_address].to_uint());
+
+          cout << "    Input " << p_in << endl;
+          cout << "    Metric " << new_metrics << endl;
+          cout << "    Next State " << next_state_index << endl;
+
+          if (next_state.metric_value > new_metrics) {
             continue;
           }
 
-          cout << "  State " << state_row << endl;
+          next_state = curr_path;
 
-          // Iterate over all possible inputs
-          for (int p_in = 0; p_in < (1 << input); p_in++) {
-            lkup_address = (lookup_size - 1) & ((state_row << input) | p_in);
-            next_state_index = (states_num - 1) & next_state_lkp[lkup_address].to_uint();
-            next_state = trellis_tree_lkup[NEXT_STAGE][next_state_index];
+          next_state.metric_value = new_metrics;
+          // Push the state to the list (array)
+          next_state.path_output[next_state.path_size++] = next_state_index[0];
 
-            new_metrics = curr_path.metric_value;
-            new_metrics += get_metrics(in_bus[input_selector / output].to_uint(), output_lkp[lkup_address].to_uint());
-
-            cout << "    Input " << in_bus[input_selector / output].to_uint() << endl;
-            cout << "    Metric " << new_metrics << endl;
-            cout << "    Next State " << next_state_index << endl;
-
-            if (next_state.metric_value > new_metrics) {
-              continue;
-            }
-
-            next_state = curr_path;
-
-            next_state.metric_value = new_metrics;
-            // Push the state to the list (array)
-            next_state.path_output[next_state.path_size++] = next_state_index[0];
-
-            trellis_tree_lkup[NEXT_STAGE][next_state_index] = next_state;
-          }
-
-          if (curr_path.path_size > 0) {
-            for (int i = 0; i < curr_path.path_size; i++) {
-            }
-          }
-
+          trellis_tree_lkup[NEXT_STAGE][next_state_index] = next_state;
         }
 
-        // Change next state to current
-        memcpy(&trellis_tree_lkup[CURR_STAGE], &trellis_tree_lkup[NEXT_STAGE], states_num * sizeof(viterbi_path_s<output, input, memory>));
+        if (curr_path.path_size > 0) {
+          for (int i = 0; i < curr_path.path_size; i++) {
+          }
+        }
 
       }
+
+      // Change next state to current
+      memcpy(&trellis_tree_lkup[CURR_STAGE], &trellis_tree_lkup[NEXT_STAGE], states_num * sizeof(viterbi_path_s<output_buffer_bit_size>));
 
       res_ready.notify();
 
@@ -178,8 +192,14 @@ template<int output, int input, int memory>
      * Build the output lookup table based on polynimials
      */
     void prc_update_output() {
-      sc_uint<output_width> output_bus;
-      viterbi_path_s<output, input, memory> curr_path = trellis_tree_lkup[CURR_STAGE][5];
+      sc_uint<1> output_bus;
+      viterbi_path_s<output_buffer_bit_size> curr_path = trellis_tree_lkup[CURR_STAGE][5];
+
+      out = sc_logic('0');
+
+      if (!serializing) {
+        return;
+      }
 
       for (int state_row = 0; state_row < states_num; state_row++) {
         if (!trellis_tree_lkup[CURR_STAGE][state_row].is_alive) {
@@ -191,11 +211,44 @@ template<int output, int input, int memory>
         }
       }
 
-      for (int path_item_index = 0; path_item_index < output_width; path_item_index++) {
-        output_bus[output_width - path_item_index - 1] = curr_path.path_output[path_item_index + 1];
+
+      out = sc_logic(curr_path.path_output[serializer_count].to_bool());
+
+      serializer_count++;
+
+      if (serializer_count > (output_buffer_bit_size - 1)) {
+        serializing = false;
+      }
+    }
+
+    void prc_decode_catch_trigger() {
+      // Initialize the Trellis Diagram
+      // Mark all as not alive and the highest metric value possible
+      for (int stage = 0; stage < MAX_STAGES; stage++) {
+        for (int state_row = 0; state_row < states_num; state_row++) {
+          trellis_tree_lkup[stage][state_row].path_size = 0;
+          trellis_tree_lkup[stage][state_row].metric_value = 0;
+          trellis_tree_lkup[stage][state_row].path_output = 0;
+          trellis_tree_lkup[stage][state_row].is_alive = false;
+        }
       }
 
-      out = output_bus;
+      // Initlialize the first trellis diagram item
+      trellis_tree_lkup[0][0].path_size = 0;
+      trellis_tree_lkup[0][0].metric_value = 0;
+      trellis_tree_lkup[0][0].path_output = 0;
+      trellis_tree_lkup[0][0].is_alive = true;
+
+      decoding = true;
+      serializing = false;
+      trellis_stage = 0;
+
+    }
+
+    void prc_decode_start_serializing() {
+      serializing = true;
+      serializer_count = 0;
+      decoding = false;
     }
 
     SC_CTOR (decoder_viterbi) {
@@ -203,24 +256,28 @@ template<int output, int input, int memory>
       // Initialize the lookup table
       create_states_lkup<output, input, memory>(next_state_lkp);
 
-      // Initialize the Trellis Diagram
-      // Mark all as not alive and the highest metric value possible
-      for (int stage = 0; stage < MAX_STAGES; stage++) {
-        for (int state_row = 0; state_row < states_num; state_row++) {
-          trellis_tree_lkup[stage][state_row].path_size = 0;
-          trellis_tree_lkup[stage][state_row].metric_value = 0;
-          trellis_tree_lkup[stage][state_row].is_alive = false;
-        }
-      }
+      // Create clock divider and connect its inputs/outputs
+      clk_divider = new clock_divider<output>("clk_div");
+      clk_divider->clk_in(clk);
+      clk_divider->clk_out(clk_div);
 
-      // Initlialize the first trellis diagram item
-      trellis_tree_lkup[0][0].path_size = 1;
-      trellis_tree_lkup[0][0].metric_value = 0;
-      trellis_tree_lkup[0][0].path_output = 0;
-      trellis_tree_lkup[0][0].is_alive = true;
+      // Add the shift register to parallelize the input
+      shift_reg =  new shift_register<output> ("shift_reg");
+      shift_reg->data_in(in);
+      shift_reg->clk(clk);
+      shift_reg->q(par_in);
+
+      decoding = false;
+      serializing = false;
 
       SC_METHOD (prc_decode_viterbi);
-      sensitive_pos << trigger;
+      sensitive_pos << clk_div;
+
+      SC_METHOD (prc_decode_catch_trigger);
+      sensitive << trigger.pos();
+
+      SC_METHOD (prc_decode_start_serializing);
+      sensitive << trigger.neg();
 
       SC_METHOD(prc_update_output_lkup)
       for (int i = 0; i < output; i++) {
@@ -228,7 +285,7 @@ template<int output, int input, int memory>
       }
 
       SC_METHOD (prc_update_output);
-      sensitive << res_ready;
+      sensitive << clk.pos();
 
     }
   };

@@ -25,26 +25,24 @@
 #define NEXT_STAGE 1
 #define MAX_STAGES 2
 
-#define MAX_PATH_LENGTH 100
 #define MAX_PATH_WIDTH 32
-#define MAX_OUTPUT_WIDTH 32
 #define MAX_METRIC_WIDTH 32
 
-template<int output, int input, int memory>
+template<int output_buffer_bit_size>
   struct viterbi_path_s {
     /** Metric Value */
     sc_uint<MAX_METRIC_WIDTH> metric_value;
     /** Size of the path */
     sc_uint<MAX_PATH_WIDTH> path_size;
     /** Path */
-    sc_uint<MAX_OUTPUT_WIDTH> path_output;
+    sc_uint<output_buffer_bit_size> path_output;
     /** Valid flag */
     bool is_alive;
 
     /**
      * Overload the = operation
      */
-    inline viterbi_path_s& operator= (const viterbi_path_s& obj) {
+    inline viterbi_path_s<output_buffer_bit_size>& operator= (const viterbi_path_s<output_buffer_bit_size>& obj) {
       metric_value = obj.metric_value;
       path_size = obj.path_size;
       path_output = obj.path_output;
@@ -54,7 +52,7 @@ template<int output, int input, int memory>
     /**
      * Overload the == operation
      */
-    inline bool operator== (const viterbi_path_s& obj) const {
+    inline bool operator== (const viterbi_path_s<output_buffer_bit_size>& obj) const {
 
       bool ret_val = true;
 
@@ -66,7 +64,7 @@ template<int output, int input, int memory>
       return ret_val;
     }
 
-    inline friend void sc_trace(sc_trace_file * tf, const viterbi_path_s<output, input, memory>& obj, const std::string& name) {
+    inline friend void sc_trace(sc_trace_file * tf, const viterbi_path_s<output_buffer_bit_size>& obj, const std::string& name) {
       std::stringstream ss;
 
       sc_trace(tf, obj.metric_value, name + ".metric");

@@ -20,6 +20,7 @@ static const int n = 2;
 static const int k = 1;
 static const int m = 4;
 static const int clock_period = 15;
+static const int out_buff = 16;
 static const double clock_duty = 0.5;
 static const int clock_start = 20;
 static const double stimulus_start = 200;
@@ -32,23 +33,22 @@ SC_TEST(decoder) {
   sc_clock sys_clock("sys_clock", clock_period, clock_duty, clock_start, false);
 
   // Create signals
-  // sc_signal<sc_lv<k> > in; //logic vector for shift register
-  // sc_signal<sc_logic> out_0; //logic output of output of convolution
+  sc_signal<sc_logic> in; //logic vector for shift register
+  sc_signal<sc_logic> out; //logic output of output of convolution
   // sc_signal<sc_logic> out_1; //logic output of output of convolution
   // sc_signal<sc_lv<m> > mem_bus[k]; //logic vector for shift register
   // sc_signal<sc_lv<m * k> > mem_bus_conv; //logic vector for shift register
   // sc_signal<sc_logic> serial_in_drv[n];
   sc_signal<sc_lv<m> > polynomials[n];
-  sc_signal<sc_lv<output_size> > in_bus;
-  sc_signal<sc_lv<7> > out_bus;
+  sc_lv<output_size> in_bus;
   sc_signal<bool> trigger;
 
   in_bus = "11110111010111";
-  // in_bus = "01100111010110";
+
   // out_bus = "1011";
 
   // Create module
-  decoder_viterbi<n, k, m> vdecoder("ViterbiDecoder");
+  decoder_viterbi<n, k, m, out_buff> vdecoder("ViterbiDecoder");
 
   // Assign polynomials
   polynomials[0] = "1111";
@@ -59,7 +59,11 @@ SC_TEST(decoder) {
   SC_STRACE(vdecoder.in);
   SC_STRACE(vdecoder.out);
   SC_STRACE(vdecoder.trigger);
-  SC_TRACE(vdecoder.trellis_tree_lkup[0][0], "first_node");
+  SC_STRACE(vdecoder.par_in);
+  SC_STRACE(vdecoder.clk_div);
+  SC_STRACE(vdecoder.serializing);
+  SC_STRACE(vdecoder.decoding);
+
 
   for (int i = 0; i < n; i++) {
     std::stringstream pol_name;
@@ -71,9 +75,17 @@ SC_TEST(decoder) {
   }
 
   vdecoder.clk(sys_clock);
-  vdecoder.in(in_bus);
-  vdecoder.out(out_bus);
+  vdecoder.in(in);
+  vdecoder.out(out);
   vdecoder.trigger(trigger);
+
+  for (int i = 0; i < 8; i++) {
+    std::stringstream trellis_node;
+
+    trellis_node << "trellis.state(" << i << ")";
+
+    SC_TRACE(vdecoder.trellis_tree_lkup[0][i], trellis_node.str().c_str());
+  }
 
   // // Input verification (1011)
   // current_check_time = stimulus_start - 1;
@@ -106,9 +118,36 @@ SC_TEST(decoder) {
   // }
 
   trigger = false;
+  in = sc_logic('0');
   sc_start(50, SC_NS);
   trigger = true;
+  for (int i = 0; i < output_size; i++) {
+    in = in_bus[output_size - i - 1];
+    sc_start(clock_period, SC_NS);
+  }
+
+  in = sc_logic('0');
+
+  sc_start(50, SC_NS);
+  trigger = false;
+
+
+  sc_start(490, SC_NS);
+
+  in_bus = "01100111010110";
+
+  trigger = true;
+  for (int i = 0; i < output_size; i++) {
+    in = in_bus[output_size - i - 1];
+    sc_start(clock_period, SC_NS);
+  }
+  in = sc_logic('0');
+
+  sc_start(5, SC_NS);
+  trigger = false;
+
   sc_start(500, SC_NS);
+
 
   exit(1);
 
