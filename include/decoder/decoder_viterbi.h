@@ -63,17 +63,18 @@ template<int output, int input, int memory, int output_buffer_bit_size>
     // Internal Signal
     /** Divided clk signal */
     sc_signal<bool> clk_div;
-    sc_signal<bool> clk_div_en;
-    sc_signal<bool> decode_done;
     /** Parallel Input */
     sc_signal<sc_lv<output> > par_in;
-    // Events
-    /** Result ready event */
-    sc_event res_ready;
-    uint trellis_stage;
-    sc_uint<16> serializer_count;
+    /** Current Trellis Stage */
+    uint curr_trellis_stage;
+    /** Conter for serializing  */
+    uint serializer_count;
+    /** Decoding state flag */
     bool decoding;
+    /** Serializing state flag */
     bool serializing;
+    /** Shift stage */
+    sc_event shift_stage;
 
 
     /**
@@ -117,13 +118,13 @@ template<int output, int input, int memory, int output_buffer_bit_size>
         return;
       }
 
-      trellis_stage++;
+      curr_trellis_stage++;
 
-      if (trellis_stage > output_buffer_bit_size) {
+      if (curr_trellis_stage > output_buffer_bit_size) {
         return;
       }
 
-      cout << "Stage: " << trellis_stage << endl;
+      cout << "Stage: " << curr_trellis_stage << endl;
       cout << "  Sel. Input: " << par_in.read().to_uint() << endl;
       for (int state_row = 0; state_row < states_num; state_row++) {
         curr_path = trellis_tree_lkup[CURR_STAGE][state_row];
@@ -168,10 +169,21 @@ template<int output, int input, int memory, int output_buffer_bit_size>
       }
 
       // Change next state to current
-      memcpy(&trellis_tree_lkup[CURR_STAGE], &trellis_tree_lkup[NEXT_STAGE], states_num * sizeof(viterbi_path_s<output_buffer_bit_size>));
+      shift_stage.notify();
 
-      res_ready.notify();
+    }
 
+    /**
+     * Shift to the next trellis stage
+     */
+    void prc_shift_stage() {
+
+      next_trigger(shift_stage);
+
+      // Change next state to current
+      for (int i = 0; i < states_num; i++) {
+        trellis_tree_lkup[CURR_STAGE][i] = trellis_tree_lkup[NEXT_STAGE][i];
+      }
     }
 
     /**
@@ -189,9 +201,9 @@ template<int output, int input, int memory, int output_buffer_bit_size>
     }
 
     /**
-     * Build the output lookup table based on polynimials
+     * Serialize the outpu
      */
-    void prc_update_output() {
+    void prc_serialize_output() {
       sc_uint<1> output_bus;
       viterbi_path_s<output_buffer_bit_size> curr_path = trellis_tree_lkup[CURR_STAGE][5];
 
@@ -241,7 +253,7 @@ template<int output, int input, int memory, int output_buffer_bit_size>
 
       decoding = true;
       serializing = false;
-      trellis_stage = 0;
+      curr_trellis_stage = 0;
 
     }
 
@@ -284,8 +296,10 @@ template<int output, int input, int memory, int output_buffer_bit_size>
         sensitive << polynomials[i];
       }
 
-      SC_METHOD (prc_update_output);
+      SC_METHOD (prc_serialize_output);
       sensitive << clk.pos();
+
+      SC_METHOD(prc_shift_stage)
 
     }
   };
