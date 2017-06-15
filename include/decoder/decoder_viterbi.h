@@ -17,6 +17,7 @@
 
 #include <systemc.h>
 #include <common/util.h>
+#include <decoder/viterbi_path.h>
 #include <bitset>
 
 #define CURR_STAGE 0
@@ -24,32 +25,44 @@
 #define MAX_STAGES 2
 
 template<int output, int input, int memory>
-  struct viterbi_path_s {
-    uint metric_value;
-    uint path_size;
-    uint states_path[output * (2 * memory - input)];
-    bool is_alive;
-  };
-
-template<int output, int input, int memory>
   SC_MODULE (decoder_viterbi) {
+    // Constants
+    /** With of the input */
     static const uint input_width = output * (2 * memory - input);
+    /** Number of states per trellis diagram stage */
     static const uint states_num = input << (memory - 1);
-    const static uint lookup_size = input << memory;
-    const static uint output_width = input_width / output;
+    /** Lookup table size */
+    static const uint lookup_size = input << memory;
+    /** Output width */
+    static const uint output_width = input_width / output;
+    // Inputs
+    /** Parallel Input */
     sc_in<sc_lv<input_width> > in;
-    sc_out<sc_lv<output_width> > out;
+    /** Input clock */
     sc_in_clk clk;
+    /** Decoding trigger */
     sc_in_clk trigger;
+    /** Polynomials input */
+    sc_in<sc_lv<memory * input> > polynomials[output];
+    // Outputs
+    /** Parallel Output */
+    sc_out<sc_lv<output_width> > out;
+    /** Trellis State Table */
     viterbi_path_s<output, input, memory> trellis_tree_lkup[MAX_STAGES][states_num];
     /** Next state lookup table */
     sc_lv<memory * input> next_state_lkp[lookup_size];
     /** Output lookup table */
     sc_lv<output> output_lkp[lookup_size];
-    /** Polynomials input */
-    sc_in<sc_lv<memory * input> > polynomials[output];
+    // Events
+    /** Result ready event */
     sc_event res_ready;
 
+    /**
+     * Calculate the metrics given 2 values
+     * @param val_0 first value
+     * @param val_1 second value
+     * @return metric value
+     */
     uint get_metrics(uint val_0, uint val_1) {
       uint distance = 0;
 
@@ -57,6 +70,7 @@ template<int output, int input, int memory>
 
       val_0 = ((1 << output) - 1) & ~val_0;
 
+      // Count the ones
       while (val_0) {
 
         if (val_0 & 0x1) {
@@ -70,11 +84,15 @@ template<int output, int input, int memory>
 
     }
 
+    /**
+     * Decode a parallel input using Viterbi algorithm
+     */
     void prc_decode_viterbi() {
       sc_lv<input_width> in_tmp = in;
       sc_lv<output> in_bus[output_width];
       sc_uint<memory + input> lkup_address;
-      viterbi_path_s<output, input, memory> * curr_path = 0;
+      viterbi_path_s<output, input, memory> curr_path;
+      viterbi_path_s<output, input, memory> next_state;
       uint new_metrics = 0;
       uint next_state_index = 0;
 
@@ -87,51 +105,39 @@ template<int output, int input, int memory>
         in_bus[output_width - i - 1] = in_tmp.range(2*i, 2*i +1);
       }
 
+      // Iterate over the entire input
       for (int input_selector = 0; input_selector < input_width; input_selector += 2) {
-        cout << " +- Trellis Diagram Stage " << input_selector / output << endl;
-        cout << " | +- Selected input: " << std::bitset<output>(in_bus[input_selector / output].to_uint()) << endl;
         for (int state_row = 0; state_row < states_num; state_row++) {
-          curr_path = &trellis_tree_lkup[CURR_STAGE][state_row];
+          curr_path = trellis_tree_lkup[CURR_STAGE][state_row];
 
-          if (!curr_path->is_alive) {
+          if (!curr_path.is_alive) {
             continue;
           }
-
-          cout << " | +- State: " << state_row << endl;
-          cout << " | | +- Possible Trasitions: " << endl;
 
           // Iterate over all possible inputs
           for (int p_in = 0; p_in < (1 << input); p_in++) {
             lkup_address = (lookup_size - 1) & ((state_row << input) | p_in);
             next_state_index = ((lookup_size >> 1) - 1) & next_state_lkp[lkup_address].to_uint();
-            viterbi_path_s<output, input, memory> * next_state = &trellis_tree_lkup[NEXT_STAGE][next_state_index];
+            next_state = trellis_tree_lkup[NEXT_STAGE][next_state_index];
 
-            new_metrics = curr_path->metric_value;
+            new_metrics = curr_path.metric_value;
             new_metrics += get_metrics(in_bus[input_selector / output].to_uint(), output_lkp[lkup_address].to_uint());
 
-            cout << " | | | +- Input: " << std::bitset<output>(output_lkp[lkup_address].to_uint()) << endl;
-            cout << " | | | | +- Next state: " << next_state_index << endl;
-            cout << " | | | | +- Input Distance: " << get_metrics(in_bus[input_selector / output].to_uint(), output_lkp[lkup_address].to_uint()) << endl;
-            cout << " | | | | +- Next state metric: " << new_metrics << endl;
-
-            if (next_state->metric_value > new_metrics) {
+            if (next_state.metric_value > new_metrics) {
               continue;
             }
 
-            memcpy(next_state, curr_path, sizeof(viterbi_path_s<output, input, memory>));
+            next_state = curr_path;
 
-            next_state->metric_value = new_metrics;
+            next_state.metric_value = new_metrics;
             // Push the state to the list (array)
-            next_state->states_path[next_state->path_size++] = next_state_index;
+            next_state.states_path[next_state.path_size++] = next_state_index;
+
+            trellis_tree_lkup[NEXT_STAGE][next_state_index] = next_state;
           }
 
-
-          cout << " | | +- Metrics: " << curr_path->metric_value << endl;
-
-          if (curr_path->path_size > 0) {
-            cout << " | | +- Path: " << endl;
-            for (int i = 0; i < curr_path->path_size; i++) {
-              cout << " | | | +- Node: " << curr_path->states_path[i] << endl;
+          if (curr_path.path_size > 0) {
+            for (int i = 0; i < curr_path.path_size; i++) {
             }
           }
 
@@ -139,7 +145,6 @@ template<int output, int input, int memory>
 
         // Change next state to current
         memcpy(&trellis_tree_lkup[CURR_STAGE], &trellis_tree_lkup[NEXT_STAGE], states_num * sizeof(viterbi_path_s<output, input, memory>));
-
 
       }
 

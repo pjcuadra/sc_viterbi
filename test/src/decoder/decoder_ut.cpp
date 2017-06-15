@@ -109,6 +109,4 @@ SC_TEST(decoder) {
   trigger = true;
   sc_start(500, SC_NS);
 
-  exit(1);
-
 }
