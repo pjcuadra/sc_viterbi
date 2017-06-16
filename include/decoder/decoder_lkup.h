@@ -17,120 +17,114 @@
 
 #include<systemc.h>
 #include<common/util.h>
+#include <decoder/viterbi_path.h>
 
-template<int output, int input, int memory>
+#define CURR_STAGE 0
+#define NEXT_STAGE 1
+#define MAX_STAGES 2
+
+template<int output, int input, int memory, int output_buffer_bit_size>
   SC_MODULE (decoder_lkup) {
-    // Inputs
-    /** Input CLK */
-    //sc_in_clk clk;
-    /** Parallel input */
-    //sc_in<sc_lv<input> > in;
-    /** Polynomials input */
-    //sc_in<sc_lv<memory * input> > polynomials[output];
-    // Outputs
-    /** Serial output */
-    //sc_out<sc_logic > out;
-    // Internal Signals
-    /** Current State */
-    //sc_lv<memory * input> curr_state;
-    /** Next state lookup table */
-    //sc_lv<memory * input> next_state_lkp[lookup_size];
-    /** Output lookup table */
-    //sc_lv<output> output_lkp[lookup_size];
-    /** Clock divider counter */
-    //uint div_counter;
 
+    // Constants
     /** Lookup table size */
     const static uint lookup_size = input << memory;
+    /** Number of states per trellis diagram stage */
+    static const uint states_num = input << (memory - 1);
+
+    /** Trellis State Table */
+   viterbi_path_s<output_buffer_bit_size> trellis_tree_lkup[MAX_STAGES][states_num]; //8
 
     // Inputs
-    sc_in<sc_uint<32>> vp_in_state;
-    sc_in<sc_uint<memory + input>> lkup_address;
-    sc_in<bool> write;
-    sc_in<bool> read;
-    sc_in<bool> input_selector;
+    sc_in<viterbi_path_s<output_buffer_bit_size> > vp_in_state;
+    sc_in<sc_uint<memory + input> > lkup_address; //5
+    sc_in<bool> write_lkup;
+    sc_in<bool> read_lkup;
+    sc_in<bool> stage_selector;
+    sc_in<bool> shift_trigger;
+    sc_in<bool> reset;
 
     // Outputs
     /** Serial output */
-    sc_in<sc_uint<32>> vp_out_state;
+    sc_out<viterbi_path_s<output_buffer_bit_size> > vp_out_state;
+
+    /**
+     * Read data from Look-Up table depending upon stage_selector
+     */
+    void prc_read_state() {
+      //viterbi_path_s<output_buffer_bit_size> tmp = trellis_tree_lkup[NEXT_STAGE][lkup_address.read( ).to_uint()];
+      if (stage_selector){
+        //vp_out_state.write(tmp);
+        vp_out_state.write(trellis_tree_lkup[NEXT_STAGE][lkup_address.read( ).to_uint()]);
+      }
+      else{
+        //vp_out_state.write(tmp);
+        vp_out_state.write(trellis_tree_lkup[CURR_STAGE][lkup_address.read( ).to_uint()]);
+      }
+    }
+
+    /**
+     * Write data from input to the Look-Up table depending upon stage_selector
+     */
+    void prc_write_state() {
+      // viterbi_path_s<output_buffer_bit_size> tmp1 = trellis_tree_lkup[NEXT_STAGE][lkup_address.read( ).to_uint()];
+      viterbi_path_s<output_buffer_bit_size> tmp = vp_in_state.read();
+      if (stage_selector){
+        // trellis_tree_lkup[NEXT_STAGE][lkup_address.write(tmp).to_uint()];
+        trellis_tree_lkup[NEXT_STAGE][lkup_address.read( ).to_uint()] = tmp;
+      }
+      else{
+      //   trellis_tree_lkup[CURR_STAGE][lkup_address] = vp_in_state.read();
+        trellis_tree_lkup[CURR_STAGE][lkup_address.read( ).to_uint()] = tmp;
+      }
+    }
+
+    /**
+     * Transit data from one state to the other on shift_trigger
+     */
+    void prc_shift() {
+      for (uint state_row = 0; state_row < states_num; state_row++) {
+        trellis_tree_lkup[NEXT_STAGE][state_row] = trellis_tree_lkup[CURR_STAGE][state_row];
+      }
+    }
 
 
     /**
-     * Transit from one state to the other depending on input and current state
+     * Flush out data of lookup table
      */
-    // void prc_state_trasition() {
-    //   sc_uint<memory * input> curr_state_int = static_cast< sc_uint<memory * input> > (curr_state);
-    //   sc_uint<memory + input> lkup_address;
-    //   sc_lv<input> in_tmp;
-    //
-    //   // Serialize the output
-    //   out = output_lkp[curr_state.to_uint()][div_counter];
-    //
-    //   // Divide the input clock by number of outputs
-    //   if (div_counter < (output - 1)) {
-    //     div_counter++;
-    //     return;
-    //   }
-    //
-    //   // Temp store the input
-    //   in_tmp = in.read();
-    //
-    //   // Build the lookup address
-    //   lkup_address = (lookup_size - 1) & ((curr_state_int << input) | in_tmp.to_uint());
-    //
-    //   // Get the next state
-    //   curr_state = next_state_lkp[lkup_address];
-    //
-    //   // Reset clock divider counter
-    //   div_counter = 0;
-    //
-    // }
-    //
-    // /**
-    //  * Build the output lookup table based on polynimials
-    //  */
-    // void prc_update_output_lkup() {
-    //   sc_lv<memory * input> polynomials_tmp[output];
-    //
-    //   // Invert the order of bits
-    //   for (int o = 0; o < output; o++) {
-    //     polynomials_tmp[o] = polynomials[output - o -1];
-    //   }
-    //
-    //   create_output_lkup<output, input, memory>(polynomials_tmp, output_lkp);
-    // }
+    void prc_flush_lookup() {
+      for (int stage = 0; stage < MAX_STAGES; stage++) {
+        for (int state_row = 0; state_row < states_num; state_row++) {
+          trellis_tree_lkup[stage][state_row].path_size = 0;
+          trellis_tree_lkup[stage][state_row].metric_value = 0;
+          trellis_tree_lkup[stage][state_row].path_output = 0;
+          trellis_tree_lkup[stage][state_row].is_alive = false;
+        }
+      }
+    }
 
-void prc_read_state() {
-
-}
-
-void prc_write_state() {
-
-}
 
     /**
      * Constructor
      */
     SC_CTOR (decoder_lkup) {
-      // Initialize the lookup table
-      // create_states_lkup<output, input, memory>(next_state_lkp);
+    /** Methods with Sensitivity list */
+      SC_METHOD(prc_read_state);
+      dont_initialize();
+      sensitive << read_lkup << stage_selector;
 
-      // div_counter = 0;
-      // curr_state = sc_lv<memory * input> (sc_logic_0);
-      //
-      // SC_METHOD(prc_state_trasition)
-      // sensitive << clk.pos();
-      //
-      // SC_METHOD(prc_update_output_lkup)
-      // for (int i = 0; i < output; i++) {
-      //   sensitive << polynomials[i];
-      // }
-      SC_METHOD(prc_read_state)
-      sensitive << read;
+      SC_METHOD(prc_write_state);
+      dont_initialize();
+      sensitive << write_lkup << stage_selector;
 
-      SC_METHOD(prc_write_state)
-      sensitive << write;
-      //
+      SC_METHOD(prc_shift);
+      dont_initialize();
+      sensitive << shift_trigger;
+
+      SC_METHOD(prc_flush_lookup);
+      dont_initialize();
+      sensitive << reset;
+
     }
   };
 

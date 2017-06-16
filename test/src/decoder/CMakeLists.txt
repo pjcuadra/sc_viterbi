@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_test_sources(decoder_ut.cpp)
+add_test_sources(decoder_lkup_ut.cpp)
