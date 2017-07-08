@@ -1,0 +1,2 @@
+doc/source/_static/encoder_simulation.jpg filter=lfs diff=lfs merge=lfs -text
+doc/source/_static/encoder_simulation.png filter=lfs diff=lfs merge=lfs -text

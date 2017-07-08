@@ -20,6 +20,7 @@ cmake_minimum_required(VERSION 2.8)
 
 # Include macros
 include(cmake/macros.cmake)
+include(cmake/test_macros.cmake)
 
 # Locate the packages
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -50,6 +51,8 @@ set(CTEST_OUTPUT_ON_FAILURE 1)
 # Parse all test sources
 include_directories(include/ test/include/)
 
+# Find pthread (need for testing)
+find_package (Threads)
 
 # Compile all tests
 add_all_tests(test/src/)
