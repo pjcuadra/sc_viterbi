@@ -166,15 +166,7 @@ run;
 After adding all signals to the visualization area and adjusting the scale the
 simulation results looks like;
 
-.. only:: html
-
-  .. image::
-    https://u67752896.dl.dropboxusercontent.com/u/67752896/encoder_simulation.png
-
-.. only:: latexpdf
-
-  .. image:: _static/encoder_simulation.png
-
+.. image:: _static/encoder_simulation.png
 
 .. note::
   Traces are located at `<your-sc_viterbi-src-code-path>/build/trace` and have

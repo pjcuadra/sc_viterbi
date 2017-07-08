@@ -13,6 +13,7 @@
 # serve to show the default.
 
 import sphinx_rtd_theme
+import urllib
 
 html_theme = "sphinx_rtd_theme"
 
@@ -287,3 +288,8 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
+
+urllib.urlretrieve(
+  "https://u67752896.dl.dropboxusercontent.com/u/67752896/" +
+  "encoder_simulation.png",
+  filename="_static/encoder_simulation.png")
