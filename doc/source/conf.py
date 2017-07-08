@@ -14,14 +14,9 @@
 
 import sphinx_rtd_theme
 import urllib
-import sys
 import os
 
-print('sys.argv[0] =', sys.argv[0])
-pathname = os.path.dirname(sys.argv[0])
-print('path =', pathname)
-print('full path =', os.path.abspath(pathname))
-print('full path =', os.path.abspath(__file__))
+static_dir = os.path.join(os.path.dirname(__file__), '_static/')
 
 html_theme = "sphinx_rtd_theme"
 
@@ -297,7 +292,10 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
 
+filename = "encoder_simulation.png"
+filename_path = os.path.join(static_dir, filename)
+
 urllib.urlretrieve(
   "https://u67752896.dl.dropboxusercontent.com/u/67752896/" +
-  "encoder_simulation.png",
-  filename="_static/encoder_simulation.png")
+  filename,
+  filename=filename_path)
