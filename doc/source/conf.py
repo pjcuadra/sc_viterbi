@@ -14,6 +14,13 @@
 
 import sphinx_rtd_theme
 import urllib
+import sys
+import os
+
+print('sys.argv[0] =', sys.argv[0])
+pathname = os.path.dirname(sys.argv[0])
+print('path =', pathname)
+print('full path =', os.path.abspath(pathname))
 
 html_theme = "sphinx_rtd_theme"
 
