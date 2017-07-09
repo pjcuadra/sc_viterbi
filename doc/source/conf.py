@@ -43,6 +43,8 @@ extensions = [
     'sphinxcontrib.plantuml',
 ]
 
+plantuml = 'plantuml'
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -302,15 +304,3 @@ urllib.urlretrieve(
   "https://u67752896.dl.dropboxusercontent.com/u/67752896/" +
   filename,
   filename=filename_path)
-
-filename = "plantuml.jar"
-filename_path = os.path.join(static_dir, filename)
-plantuml_link = "http://sourceforge.net/projects/plantuml/files" \
-    "/plantuml.jar/download"
-
-urllib.urlretrieve(
-  plantuml_link,
-  filename=filename_path)
-
-plantuml = 'java -jar {}'.format(filename_path)
-print('PlantUML cmd', plantuml)
