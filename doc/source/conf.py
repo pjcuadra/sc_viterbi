@@ -43,7 +43,9 @@ extensions = [
     'sphinxcontrib.plantuml',
 ]
 
-plantuml = 'plantuml'
+plantuml = os.path.join(os.path.dirname(__file__), 'plantuml.sh')
+
+# plantuml = '/ws/git/sc_viterbi/doc/source/plantuml.sh'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -311,6 +313,9 @@ files = ["encoder_simulation.png",
 
 for image_file in files:
     filename_path = os.path.join(static_dir, image_file)
+
+    if os.path.isfile(filename_path):
+        continue
 
     urllib.urlretrieve(
       "https://u67752896.dl.dropboxusercontent.com/u/67752896/sc_viterbi/" +
