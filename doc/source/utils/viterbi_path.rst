@@ -14,7 +14,7 @@ overview of the class.
 
   @startuml
     class sc_core::sc_signal
-
+    
     class viterbi_path_s<int output_buffer_bit_size> {
       sc_uint<MAX_METRIC_WIDTH> metric_value
       sc_uint<MAX_PATH_WIDTH> path_size
