@@ -14,7 +14,6 @@ Welcome to SystemC Viterbi's documentation!
 .. toctree::
    :maxdepth: 2
 
-   intro
    dev_env
    building_system
    testing_framework
