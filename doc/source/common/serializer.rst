@@ -99,7 +99,13 @@ Class Description
 Structure
 *********
 
-TODO
+:numref:`serializer_circuit` shows the structure of the serializer module.
+
+.. _serializer_circuit:
+.. figure:: ../_static/serializer_circuit.png
+  :align: center
+
+  Serializer Circuit
 
 Simulation Results
 ******************

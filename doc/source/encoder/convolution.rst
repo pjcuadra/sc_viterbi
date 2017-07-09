@@ -62,7 +62,12 @@ Class Description
 Structure
 *********
 
-TODO
+The structure of this module comprises an array of :math:`input * memory`
+and-gates to apply a bit-wise and between the polynomials and the input port.
+After applying the bit-wise and a xor reduce of all bits have to be applied.
+This implied :math:`(input * memory) - 1` xor-gates applying a xor operation
+to every bit of the result of the bit-wise and the result of the xor gate of the
+previous 2 bits (for the first 2 bits the xor-gate is simply apply to both).
 
 Simulation Results
 ******************

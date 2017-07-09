@@ -70,7 +70,14 @@ Class Description
 Structure
 *********
 
-TODO
+:numref:`shift_register_circuit` shows the structure of the generic shift
+register. Our implementation doesn't differ from the generic shift register.
+
+.. _shift_register_circuit:
+.. figure:: ../_static/shift_register_circuit.png
+  :align: center
+
+  Shift Register Circuit
 
 Simulation Results
 ******************

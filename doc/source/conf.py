@@ -303,6 +303,10 @@ files = ["encoder_simulation.png",
          "decoder_simulation_errors.png",
          "serializer_simulation.png",
          "shift_register_simulation.png",
+         "shift_register_circuit.png",
+         "serializer_circuit.png",
+         "encoder_lkup_circuit.png",
+         "encoder_circuit.png",
          "clock_divider_simulation.png"]
 
 for image_file in files:

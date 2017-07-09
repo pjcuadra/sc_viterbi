@@ -7,7 +7,6 @@
 .. raw:: latex
 
   \listoffigures
-  \listoftables
 
 Welcome to SystemC Viterbi's documentation!
 ===========================================

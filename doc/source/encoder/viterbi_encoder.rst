@@ -141,6 +141,13 @@ Class Description
 Structure
 *********
 
-TODO
+:numref:`encoder_circuit` shows the structure of the our Viterbi encoder
+implementation without using lookup tables.
+
+.. _encoder_circuit:
+.. figure:: ../_static/encoder_circuit.png
+  :align: center
+
+  Viterbi Encoder Circuit
 
 .. include:: encoder_simulation_results.rst

@@ -214,13 +214,6 @@ Class Description
     :param unit val_1: Second value
     :return: Metric value
 
-
-
-Structure
-*********
-
-TODO
-
 Simulation Results
 ******************
 
