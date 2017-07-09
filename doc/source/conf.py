@@ -297,10 +297,18 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
 
-filename = "encoder_simulation.png"
-filename_path = os.path.join(static_dir, filename)
+files = ["encoder_simulation.png",
+         "convolution_simulation.png",
+         "decoder_simulation.png",
+         "decoder_simulation_errors.png",
+         "serializer_simulation.png",
+         "shift_register_simulation.png",
+         "clock_divider_simulation.png"]
 
-urllib.urlretrieve(
-  "https://u67752896.dl.dropboxusercontent.com/u/67752896/" +
-  filename,
-  filename=filename_path)
+for image_file in files:
+    filename_path = os.path.join(static_dir, image_file)
+
+    urllib.urlretrieve(
+      "https://u67752896.dl.dropboxusercontent.com/u/67752896/sc_viterbi/" +
+      image_file,
+      filename=filename_path)
