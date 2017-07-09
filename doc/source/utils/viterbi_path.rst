@@ -49,7 +49,7 @@ Class Description
 
   .. cpp:var:: sc_uint<output_buffer_bit_size> path_output
 
-    Ordered array of states comprising the Viterbi path.
+    Decoded value because of the taken path.
 
   .. cpp:var:: bool is_alive
 

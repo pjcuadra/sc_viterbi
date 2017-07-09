@@ -224,4 +224,140 @@ TODO
 Simulation Results
 ******************
 
-TODO
+The code of the test case of the viterbi_decoder is shown below;
+
+.. code-block:: cpp
+  :linenos:
+
+  static const int n = 2;
+  static const int k = 1;
+  static const int m = 4;
+
+  ...
+
+  static const int output_size = n * (2* m - k);
+
+  SC_TEST(decoder) {
+
+    // Create signals
+    sc_signal<sc_logic> in;
+    sc_signal<sc_logic> out;
+    sc_lv<4> expected_out;
+    sc_signal<sc_lv<m> > polynomials[n];
+    sc_lv<output_size> in_bus;
+    sc_signal<bool> trigger;
+    uint current_check_time;
+
+
+    expected_out = "1011";
+
+    // Create module
+    decoder_viterbi<n, k, m, out_buff> vdecoder("ViterbiDecoder");
+
+    // Assign polynomials
+    polynomials[0] = "1111";
+    polynomials[1] = "1101";
+
+    ...
+
+    for (int i = 0; i < n; i++) {
+      ...
+      vdecoder.polynomials[i](polynomials[i]);
+    }
+
+    vdecoder.clk(sys_clock);
+    vdecoder.in(in);
+    vdecoder.out(out);
+    vdecoder.trigger(trigger);
+
+    ...
+
+    // Output verification (1011)
+    current_check_time = 312;
+    SC_EXPECT_AT(sc_logic('0'), out, current_check_time, SC_NS);
+    current_check_time += clock_period;
+    for (int i = 0; i < m; i++) {
+      SC_EXPECT_AT(sc_logic(expected_out.get_bit(m - i -1)), out, current_check_time, SC_NS);
+      current_check_time += clock_period;
+    }
+
+    current_check_time = 1010;
+    SC_EXPECT_AT(sc_logic('0'), out, current_check_time, SC_NS);
+    current_check_time += clock_period;
+    for (int i = 0; i < m; i++) {
+      SC_EXPECT_AT(sc_logic(expected_out.get_bit(m - i -1)), out, current_check_time, SC_NS);
+      current_check_time += clock_period;
+    }
+
+
+
+    trigger = false;
+    in = sc_logic('0');
+
+    // Trigger and receive the correct data
+    sc_start(50, SC_NS);
+    trigger = true;
+
+    in_bus = "11110111010111";
+
+    for (int i = 0; i < output_size; i++) {
+      in = in_bus[output_size - i - 1];
+      sc_start(clock_period, SC_NS);
+    }
+
+    in = sc_logic('0');
+
+    sc_start(50, SC_NS);
+    trigger = false;
+
+
+    sc_start(490, SC_NS);
+
+    // Trigger and receive the data with errors
+    in_bus = "01100111010110";
+    trigger = true;
+    for (int i = 0; i < output_size; i++) {
+      in = in_bus[output_size - i - 1];
+      sc_start(clock_period, SC_NS);
+    }
+    in = sc_logic('0');
+
+    sc_start(5, SC_NS);
+    trigger = false;
+
+    sc_start(500, SC_NS);
+
+  }
+
+.. note::
+  * At :math:`50ns` the correct data starts coming in.
+  * At :math:`815ns` the data with 3 inverted bits starts coming in.
+
+
+:numref:`decoder_sim_wave` shows the result of the simulation for the correct
+data being received and :numref:`decoder_error_sim_wave` shows the results
+of the simulation for the data with 3 inverted bits.
+
+.. _decoder_sim_wave:
+.. figure:: ../_static/decoder_simulation.png
+  :align: center
+
+  Decoder Simulation Wave Result
+
+.. _decoder_error_sim_wave:
+.. figure:: ../_static/decoder_simulation_errors.png
+  :align: center
+
+  Decoder Simulation With Errors Wave Result
+
+.. note::
+
+  * At :math:`312.5ns` the decoding of the correct data starts going out.
+  * The decoding of the correct data is :math:`b1011`.
+  * At :math:`1017.5ns` the decoding of the data with errors starts going out.
+  * The decoding of the data with 3 inverted bits is :math:`b1011`.
+  * The decoding is successful even with errors.
+  * The metric of best path (with higher metric) passing through every of the
+    :math:`8` states can be seen in the `trellis.state(0-7).metric[31:0]`.
+  * The possible output of best path (with higher metric) passing through every
+    of the :math:`8` states can be seen in the `trellis.state(0-7).output[15:0]`
