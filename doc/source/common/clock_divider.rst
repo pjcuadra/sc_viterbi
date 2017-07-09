@@ -73,4 +73,19 @@ The structure of the clock divider is trivial since it has only one process.
 Simulation Results
 ******************
 
-TODO
+The simulation of the clock divider is just create 2 clock divider one with
+ratio 3 and other with ratio 4. :numref:`clock_divider_sim_wave` shows the
+result of the simulation.
+
+
+.. _clock_divider_sim_wave:
+.. figure:: ../_static/clock_divider_simulation.png
+  :align: center
+
+  Clock Divider Simulation Wave Result
+
+.. note::
+
+  * `div_clock_3` has :math:`\frac{1}{3}` of the frequency of `sys_clock`
+  * `div_clock_4` has :math:`\frac{1}{4}` of the frequency of `sys_clock`
+  * `div_clock_3` and `div_clock_4` conserve :math:`50\%` duty cycle

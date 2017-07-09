@@ -104,4 +104,56 @@ TODO
 Simulation Results
 ******************
 
-TODO
+The code of the test case of the serializer is shown below;
+
+.. code-block:: cpp
+  :linenos:
+
+  ...
+
+  static const int inputs = 8;
+
+  SC_TEST(serializer) {
+    sc_clock sys_clock("sys_clock", clock_period, clock_duty, clock_start, false);
+    sc_signal<sc_logic> ser_out;
+    sc_signal<bool> ser_trig;
+    sc_signal<sc_lv<inputs> > par_in;
+
+    ...
+
+    clock_divider<inputs> clk_div ("CLK_DIV");
+
+    ...
+
+    serializer<inputs> serializer ("Serializer");
+    serializer.ser_out(ser_out);
+    serializer.clk_in(sys_clock);
+    serializer.par_in(par_in);
+    serializer.ser_trig(ser_trig);
+
+    par_in = sc_lv<inputs>("00000000");
+    sc_start(125, SC_NS);
+
+    par_in = sc_lv<inputs>("10010010");
+    sc_start(400, SC_NS);
+
+  }
+
+.. note::
+  * The width of the serializer is :math:`8`
+  * `par_in[7:0]` is set to :math:`0x92` at :math:`125ns`
+
+:numref:`serializer_sim_wave` shows the result of the simulation.
+
+.. _serializer_sim_wave:
+.. figure:: ../_static/serializer_simulation.png
+  :align: center
+
+  Serializer Simulation Wave Result
+
+.. note::
+
+  * `ser_trig` triggers the serialization to `ser_out`
+  * `par_in[7:0]` has a :math:`0x92` and is the value that is actually
+    serialized
+  * `ser_out` outputs the MSb first and the LSb at the end

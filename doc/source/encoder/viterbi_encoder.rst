@@ -143,7 +143,4 @@ Structure
 
 TODO
 
-Simulation Results
-******************
-
-TODO
+.. include:: encoder_simulation_results.rst

@@ -75,4 +75,55 @@ TODO
 Simulation Results
 ******************
 
-TODO
+The code of the test case of the shift_register is shown below;
+
+.. code-block:: cpp
+  :linenos:
+
+  ...
+
+  static const int reg_width = 5;
+
+  SC_TEST(shift_register) {
+    sc_signal<sc_logic> data_in;
+    sc_signal<sc_lv<reg_width> > register_state;
+    sc_clock sys_clock("sys_clock", clock_period, clock_duty, clock_start, false);
+
+    ...
+
+    shift_register<reg_width> sregister ("ShiftRegister");
+
+    ...
+
+    data_in = sc_logic('0');
+    sc_start(50, SC_NS);
+    data_in = sc_logic('1');
+    sc_start(100, SC_NS);
+    data_in = sc_logic('0');
+    sc_start(100, SC_NS);
+  }
+
+.. note::
+  * `data_in` starts at `sc_logic('0')`
+  * `data_in` toggles to `sc_logic('1')` at :math:`50ns`
+  * `data_in` toggles back to `sc_logic('0')` at :math:`100ns`
+  * Shift Register width is :math:`5`
+
+:numref:`shift_register_sim_wave` shows the result of the simulation.
+
+.. _shift_register_sim_wave:
+.. figure:: ../_static/shift_register_simulation.png
+  :align: center
+
+  Shift Register Simulation Wave Result
+
+.. note::
+
+  * At :math:`50ns` the shifting of `sc_logic('1')` starts. The `sc_logic('1')`
+    is injected at the MSb.
+  * Between :math:`120ns` and :math:`150ns` the value of `register_state[4:0]`
+    stays constant at :math:`0x1F` because of the shift register's width is set
+    to :math:`5`.
+  * After :math:`150ns` the shifting of `sc_logic('0')` starts
+  * 5 clock cycles after :math:`150ns` the `register_state[4:0]` is back to
+    :math:`0x0`.

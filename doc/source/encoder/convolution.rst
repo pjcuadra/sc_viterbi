@@ -67,4 +67,53 @@ TODO
 Simulation Results
 ******************
 
-TODO
+The code of the test case of the convolution is shown below;
+
+.. code-block:: cpp
+  :linenos:
+
+  ...
+
+  static const int reg_width = 3;
+
+  ...
+
+  SC_TEST(convolution) {
+
+    // create channels
+    sc_signal<sc_lv<reg_width> > shift_reg; //logic vector for shift register
+    sc_signal<sc_lv<reg_width> > generator_polynomial; //logic vector for shift register
+    sc_signal<sc_logic> conv_output; //logic output of output of convolution
+
+    // create module
+    convolution<reg_width> convolution("Convolution");
+
+    ...
+
+    generator_polynomial = "101";
+
+    // start simulation
+    shift_reg = "100";
+    sc_start(100, SC_NS);
+
+    shift_reg = "110";
+    sc_start(100, SC_NS);
+
+  }
+
+.. note::
+  * `generator_polynomial` is constant with value :math:`b101`
+  * `shift_reg` starts with value :math:`b100` and changes to :math:`b110` at
+    :math:`100ns`.
+
+:numref:`convolution_sim_wave` shows the result of the simulation.
+
+.. _convolution_sim_wave:
+.. figure:: ../_static/convolution_simulation.png
+  :align: center
+
+  Convolution Simulation Wave Result
+
+.. note::
+
+  * Since the convolution is purely combinational no clock is needed.

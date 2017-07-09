@@ -29,7 +29,7 @@ SC_TEST(shift_register) {
   SC_TRACE(register_state, "register_state");
   SC_TRACE(data_in, "data_in");
 
-  shift_register<reg_width> sregister ("FullAdder");
+  shift_register<reg_width> sregister ("ShiftRegister");
   sregister.data_in (data_in);
   sregister.clk (sys_clock);
   sregister.q (register_state);
