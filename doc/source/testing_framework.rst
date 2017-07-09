@@ -64,13 +64,13 @@ in `CTest`. This makes it easier for test running through `ctest` command or
 APIs
 ----
 
-.. function:: SC_TEST(test_name)
+.. c:macro:: SC_TEST(test_name)
 
   Define a test with a given test name
 
   :param string test_name: The name or label of the test
 
-.. function:: SC_EXPECT_AT(expected, actual, time_val, time_unit)
+.. c:macro:: SC_EXPECT_AT(expected, actual, time_val, time_unit)
 
   Check that actual equals expected at a given moment
 
@@ -83,14 +83,14 @@ APIs
 Tracing
 *******
 
-.. function:: SC_TRACE(signal, name)
+.. c:macro:: SC_TRACE(signal, name)
 
    Add a signal to the test's trace file with the provided name
 
    :param sc_signal signal: The signal to be added to the trace
    :param string name: The given name for the signal
 
-.. function:: SC_STRACE(signal)
+.. c:macro:: SC_STRACE(signal)
 
   Add a signal to the test's trace file
 
@@ -104,8 +104,8 @@ Test Example
 The following code was taken from our clock divider's test. It is a good
 example to show how our testing framework works.
 
-.. code::
-  :number-lines:
+.. code-block:: cpp
+  :linenos:
 
   #include <sc_test_framework.h>
 
@@ -156,7 +156,7 @@ of its usability and scope. It was incubated in within this project.
 APIs
 ****
 
-.. function:: SC_EXPECT_AFTER(expected, actual, time_val, time_unit)
+.. c:macro:: SC_EXPECT_AFTER(expected, actual, time_val, time_unit)
 
   Check that actual equals expected after a specific time interval
 
@@ -165,7 +165,7 @@ APIs
   :param double time_val: Time value
   :param sc_time_unit time_unit: Time unit
 
-.. function:: SC_SIGNAL_SET(signal, value, time_val, time_unit)
+.. c:macro:: SC_SIGNAL_SET(signal, value, time_val, time_unit)
 
   Set the signal to a specific value at a specific point in time
 
@@ -174,10 +174,10 @@ APIs
   :param double time_val: Time value
   :param sc_time_unit time_unit: Time unit
 
-.. function:: SC_SETUP()
+.. c:macro:: SC_SETUP()
 
   Set up everything before the test run
 
-.. function:: SC_TEARDOWN()
+.. c:macro:: SC_TEARDOWN()
 
   Clean everything up after the test run

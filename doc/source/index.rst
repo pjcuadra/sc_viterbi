@@ -3,18 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
+.. raw:: latex
+
+  \listoffigures
+  \listoftables
+
 Welcome to SystemC Viterbi's documentation!
 ===========================================
-
-This is a Viterbi's encoder and decoder implementation using SystemC. The entire
-project is based on OpenSource tools and provides a development environment for
-compiling and simulating SystemC code, as well as visualizing traces.
-
-TODO: Descriptions of chapters
 
 .. toctree::
    :maxdepth: 2
 
+   intro
    dev_env
    building_system
    testing_framework
+   utils/index
+   common/index
+   encoder/index
+   decoder/index

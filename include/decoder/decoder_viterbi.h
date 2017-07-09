@@ -38,7 +38,7 @@ template<int output, int input, int memory, int output_buffer_bit_size>
     /** Output width */
     static const uint output_width = input_width / output;
     // Inputs
-    /** Parallel Input */
+    /** Serial Input */
     sc_in<sc_logic> in;
     /** Input clock */
     sc_in_clk clk;
@@ -47,7 +47,7 @@ template<int output, int input, int memory, int output_buffer_bit_size>
     /** Polynomials input */
     sc_in<sc_lv<memory * input> > polynomials[output];
     // Outputs
-    /** Parallel Output */
+    /** Serial Output */
     sc_out<sc_logic> out;
     /** Trellis State Table */
     viterbi_path_s<output_buffer_bit_size> trellis_tree_lkup[MAX_STAGES][states_num];
@@ -179,7 +179,7 @@ template<int output, int input, int memory, int output_buffer_bit_size>
     }
 
     /**
-     * Build the output lookup table based on polynimials
+     * Build the output lookup table based on polynomials
      */
     void prc_update_output_lkup() {
       sc_lv<memory * input> polynomials_tmp[output];
@@ -193,7 +193,7 @@ template<int output, int input, int memory, int output_buffer_bit_size>
     }
 
     /**
-     * Serialize the outpu
+     * Serialize the output
      */
     void prc_serialize_output() {
       sc_uint<1> output_bus;

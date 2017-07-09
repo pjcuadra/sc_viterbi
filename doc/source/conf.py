@@ -22,6 +22,8 @@ html_theme = "sphinx_rtd_theme"
 
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
+numfig = True
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -38,7 +40,10 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
+    'sphinxcontrib.plantuml',
 ]
+
+plantuml = 'plantuml'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

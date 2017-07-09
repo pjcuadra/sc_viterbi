@@ -164,9 +164,13 @@ run;
   gtkwave <your-sc_viterbi-src-code-path>/build/trace/enconder/encoder.vcd
 
 After adding all signals to the visualization area and adjusting the scale the
-simulation results looks like;
+simulation results looks like in :numref:`encoder_sim_prev`.
 
-.. image:: _static/encoder_simulation.png
+.. _encoder_sim_prev:
+.. figure:: _static/encoder_simulation.png
+  :align: center
+
+  Encoder Simulation Preview
 
 .. note::
   Traces are located at `<your-sc_viterbi-src-code-path>/build/trace` and have

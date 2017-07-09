@@ -47,7 +47,7 @@ template<int output, int input, int memory>
     /** Shift registers' memory buses */
     sc_signal<sc_lv<memory> > mem_bus[input];
     // Sub modules
-    /** Convolution Block*/
+    /** Convolution Block */
     convolution<memory * input> * conv_block[output];
     /** Shift Registers */
     shift_register<memory> * register_bank[input];
